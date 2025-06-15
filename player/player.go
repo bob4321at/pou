@@ -3,6 +3,7 @@ package player
 import (
 	"main/camera"
 	"main/level"
+	"main/music"
 	"main/utils"
 	"math"
 
@@ -12,14 +13,17 @@ import (
 )
 
 type Bullet struct {
-	Pos utils.Vec2
-	Vel utils.Vec2
-	Img textures.RenderableTexture
+	Pos    utils.Vec2
+	Vel    utils.Vec2
+	Img    textures.RenderableTexture
+	Damage int
+	Hit    bool
 }
 
-func NewBullet(Pos, Vel utils.Vec2) (bullet Bullet) {
+func NewBullet(Pos, Vel utils.Vec2, damage int) (bullet Bullet) {
 	bullet.Pos = Pos
 	bullet.Vel = Vel
+	bullet.Damage = damage
 
 	bullet.Img = textures.NewTexture("./art/bullet.png", "")
 
@@ -33,7 +37,8 @@ func (bullet *Bullet) Update() {
 	for i := range level.Temp_Level.Enemies {
 		enemy := level.Temp_Level.Enemies[i]
 		if utils.Collide(bullet.Pos, utils.Vec2{X: 4, Y: 4}, enemy.GetPosition(), enemy.GetSize()) {
-			enemy.Hit(1)
+			enemy.Hit(bullet.Damage)
+			bullet.Hit = true
 		}
 	}
 }
@@ -75,10 +80,6 @@ func (player *PlayerStruct) Update() {
 		}
 	}
 
-	if !ebiten.IsKeyPressed(ebiten.KeyA) && !ebiten.IsKeyPressed(ebiten.KeyD) {
-		player.Vel.X -= player.Vel.X / 5
-	}
-
 	if player.Vel.X > 0 {
 		player.Dir = false
 	} else {
@@ -95,6 +96,9 @@ func (player *PlayerStruct) Update() {
 		player.Vel.Y = 0
 		if ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeySpace) {
 			player.Vel.Y = -4
+		}
+		if !ebiten.IsKeyPressed(ebiten.KeyA) && !ebiten.IsKeyPressed(ebiten.KeyD) {
+			player.Vel.X -= player.Vel.X / 5
 		}
 	}
 
@@ -113,13 +117,26 @@ func (player *PlayerStruct) Update() {
 	}
 
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) && player.Cooldown < 1 {
-		player.Bullets = append(player.Bullets, NewBullet(utils.Vec2{X: player.Pos.X + (640 / 2), Y: player.Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(player.Real_Gun_Rot)), Y: math.Sin(utils.Deg2Rad(player.Real_Gun_Rot))}))
-		player.Cooldown = 3
+		if music.AtPeak {
+			player.Bullets = append(player.Bullets, NewBullet(utils.Vec2{X: player.Pos.X + (640 / 2), Y: player.Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(player.Real_Gun_Rot)) * 2, Y: math.Sin(utils.Deg2Rad(player.Real_Gun_Rot)) * 2}, 5))
+			player.Cooldown = 2
+
+			player.Vel.X -= math.Cos(utils.Deg2Rad(player.Real_Gun_Rot)) * 10
+			player.Vel.Y -= math.Sin(utils.Deg2Rad(player.Real_Gun_Rot)) * 5
+		} else {
+			player.Bullets = append(player.Bullets, NewBullet(utils.Vec2{X: player.Pos.X + (640 / 2), Y: player.Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(player.Real_Gun_Rot)), Y: math.Sin(utils.Deg2Rad(player.Real_Gun_Rot))}, 1))
+			player.Cooldown = 7
+		}
 	}
 	player.Cooldown -= 0.1
 
 	for b := range player.Bullets {
-		player.Bullets[b].Update()
+		if b < len(player.Bullets) {
+			player.Bullets[b].Update()
+			if player.Bullets[b].Hit {
+				utils.RemoveArrayElement(b, &player.Bullets)
+			}
+		}
 	}
 }
 

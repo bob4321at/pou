@@ -4,6 +4,7 @@ import "math"
 
 var Mouse_X float64
 var Mouse_Y float64
+var GameTime float64
 
 type Vec2 struct {
 	X, Y float64
@@ -35,4 +36,23 @@ func GetAngle(point_1, point_2 Vec2) float64 {
 
 func RemoveArrayElement[T any](index_to_remove int, slice *[]T) {
 	*slice = append((*slice)[:index_to_remove], (*slice)[index_to_remove+1:]...)
+}
+
+func CalculateVolume(buf []byte) float64 {
+	var sum int64
+	for i := 0; i < len(buf); i += 2 {
+		if i+1 >= len(buf) {
+			break
+		}
+		// Convert 2 bytes (little-endian) into a signed 16-bit value
+		sample := int16(buf[i]) | int16(buf[i+1])<<8
+		sum += int64(sample) * int64(sample)
+	}
+
+	count := len(buf) / 2
+	if count == 0 {
+		return 0
+	}
+	mean := float64(sum) / float64(count)
+	return math.Sqrt(mean) / 32768.0 // Normalize to range [0.0, 1.0]
 }

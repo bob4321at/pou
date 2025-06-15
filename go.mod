@@ -4,7 +4,9 @@ go 1.24.4
 
 require (
 	github.com/bob4321at/textures v1.0.0
+	github.com/ebitengine/oto/v3 v3.3.3
 	github.com/hajimehoshi/ebiten/v2 v2.8.8
+	github.com/hajimehoshi/go-mp3 v0.3.4
 )
 
 require (

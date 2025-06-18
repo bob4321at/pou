@@ -101,13 +101,11 @@ func NewMusic(path string) (music MusicStruct) {
 		for music.Player.IsPlaying() {
 			time.Sleep(time.Millisecond)
 
+			AtPeak = false
+
 			for _, frame := range music.Peaks {
-				if frame.Frame >= int(utils.GameTime-2) && frame.Frame <= int(utils.GameTime+2) {
+				if frame.Frame >= int(utils.GameTime-1.3) && frame.Frame <= int(utils.GameTime+1.3) {
 					AtPeak = true
-					go func() {
-						time.Sleep(time.Second / 7)
-						AtPeak = false
-					}()
 				}
 			}
 		}

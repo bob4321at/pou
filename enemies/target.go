@@ -22,7 +22,7 @@ func (target *Target) Draw(screen *ebiten.Image) {
 	op.GeoM.Translate(target.Pos.X+camera.Camera.Pos.X, target.Pos.Y+camera.Camera.Pos.Y)
 
 	target.Img.SetUniforms(map[string]any{
-		"I": 1000,
+		"I": target.I_Frames,
 	})
 
 	target.Img.Draw(screen, &op)

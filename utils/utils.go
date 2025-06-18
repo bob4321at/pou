@@ -34,6 +34,13 @@ func GetAngle(point_1, point_2 Vec2) float64 {
 	return math.Atan2(offset_x, offset_y)
 }
 
+func GetDist(point_1, point_2 Vec2) float64 {
+	offx := math.Abs(point_1.X - point_2.X)
+	offy := math.Abs(point_1.Y - point_2.Y)
+
+	return math.Sqrt((offx * offx) + (offy * offy))
+}
+
 func RemoveArrayElement[T any](index_to_remove int, slice *[]T) {
 	*slice = append((*slice)[:index_to_remove], (*slice)[index_to_remove+1:]...)
 }

@@ -37,28 +37,6 @@ func (level *Level) Draw(screen *ebiten.Image) {
 
 				screen.DrawImage(img, &op)
 			}
-			if tile == 3 {
-				op := ebiten.DrawImageOptions{}
-				op.GeoM.Translate(float64(x)*32+(camera.Camera.Pos.X), float64(y)*32+(camera.Camera.Pos.Y))
-
-				img, _, err := ebitenutil.NewImageFromFile("./art/right_ramp.png")
-				if err != nil {
-					panic(err)
-				}
-
-				screen.DrawImage(img, &op)
-			}
-			if tile == 2 {
-				op := ebiten.DrawImageOptions{}
-				op.GeoM.Translate(float64(x)*32+(camera.Camera.Pos.X), float64(y)*32+(camera.Camera.Pos.Y))
-
-				img, _, err := ebitenutil.NewImageFromFile("./art/left_ramp.png")
-				if err != nil {
-					panic(err)
-				}
-
-				screen.DrawImage(img, &op)
-			}
 		}
 	}
 
@@ -80,24 +58,6 @@ func (level *Level) CheckCollision(pos utils.Vec2, size utils.Vec2) (bool, int, 
 		for x, tile := range row {
 			if tile == 1 {
 				check := utils.Collide(pos, size, utils.Vec2{X: float64(x) * 32, Y: float64(y) * 32}, utils.Vec2{X: 32, Y: 31})
-
-				if check {
-					hit = true
-					hit_tile = tile
-					tile_pos = utils.Vec2{X: float64(x) * 32, Y: float64(y) * 32}
-				}
-			}
-			if tile == 2 {
-				check := utils.Collide(pos, size, utils.Vec2{X: float64(x) * 32, Y: float64(y) * 32}, utils.Vec2{X: 32, Y: 32})
-
-				if check {
-					hit = true
-					hit_tile = tile
-					tile_pos = utils.Vec2{X: float64(x) * 32, Y: float64(y) * 32}
-				}
-			}
-			if tile == 3 {
-				check := utils.Collide(pos, size, utils.Vec2{X: float64(x) * 32, Y: float64(y) * 32}, utils.Vec2{X: 32, Y: 32})
 
 				if check {
 					hit = true

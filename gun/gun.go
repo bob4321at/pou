@@ -7,7 +7,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-var Player_Pos utils.Vec2
+var Player_Pos *utils.Vec2
+var Player_Vel *utils.Vec2
 
 type Bullet interface {
 	Update()

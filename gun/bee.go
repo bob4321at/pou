@@ -1,7 +1,6 @@
 package gun
 
 import (
-	"fmt"
 	"main/camera"
 	"main/enemies"
 	"main/level"
@@ -21,37 +20,49 @@ type BeeBullet struct {
 	Hit      bool
 	Damage   int
 	Remove   bool
+	Lifttime float64
 }
 
 func (bullet *BeeBullet) Update() {
 	bullet.Img.Update()
 
-	bullet.Rotation = (math.Atan2(bullet.Vel.X, bullet.Vel.Y))
+	bullet.Vel.X = math.Cos(utils.Deg2Rad(bullet.Rotation))
+	bullet.Vel.Y = math.Sin(utils.Deg2Rad(bullet.Rotation))
 
-	var closest_enemy enemies.Enemy
-	var current_closest_distance float64 = 1000000000
+	if len(level.Temp_Level.Enemies) != 0 {
+		var closest_enemy enemies.Enemy
+		closest_enemy_distance := -1.0
 
-	for i := range level.Temp_Level.Enemies {
-		if math.Abs(utils.GetDist(level.Temp_Level.Enemies[i].GetPosition(), bullet.Position)) < current_closest_distance {
-			closest_enemy = level.Temp_Level.Enemies[i]
+		closest_enemy = level.Temp_Level.Enemies[0]
+		closest_enemy_distance = math.Abs(utils.GetDist(bullet.Position, closest_enemy.GetPosition()))
+
+		for ei, enemy := range level.Temp_Level.Enemies {
+			if math.Abs(utils.GetDist(bullet.Position, enemy.GetPosition())) < closest_enemy_distance {
+				closest_enemy = level.Temp_Level.Enemies[ei]
+				closest_enemy_distance = math.Abs(utils.GetDist(bullet.Position, enemy.GetPosition()))
+			}
 		}
-	}
 
-	if closest_enemy != nil {
-		angle_between := utils.GetAngle(closest_enemy.GetPosition(), bullet.Position)
-
-		if -utils.Rad2Deg(angle_between) < (bullet.Rotation+180)+1710 {
-			// bullet.Rotation += 5
+		if math.Atan2(bullet.Vel.X, bullet.Vel.Y) > utils.GetAngle(closest_enemy.GetPosition(), bullet.Position) {
+			bullet.Rotation += 2
 		} else {
-			// bullet.Rotation -= 5
+			bullet.Rotation -= 2
 		}
-
-		// bullet.Rotation = ((bullet.Rotation) + (bullet.Rotation) + (bullet.Rotation) + (bullet.Rotation) + (bullet.Rotation) + (bullet.Rotation) + (bullet.Rotation) + (bullet.Rotation) + (-utils.Rad2Deg(angle_between) + 90)) / 9
-		fmt.Println(bullet.Rotation)
+	} else {
+		if math.Atan2(bullet.Vel.X, bullet.Vel.Y) > utils.GetAngle(utils.Vec2{X: Player_Pos.X + 320, Y: Player_Pos.Y + 20}, bullet.Position) {
+			bullet.Rotation += 2
+		} else {
+			bullet.Rotation -= 2
+		}
 	}
 
-	bullet.Position.X += bullet.Vel.X * 5
-	bullet.Position.Y += bullet.Vel.Y * 5
+	bullet.Lifttime -= 0.1
+	if bullet.Lifttime < 0 {
+		bullet.Remove = true
+	}
+
+	bullet.Position.X += bullet.Vel.X * 1
+	bullet.Position.Y += bullet.Vel.Y * 1
 }
 
 func (bullet *BeeBullet) Draw(screen *ebiten.Image) {
@@ -84,6 +95,7 @@ func CreateBeeBullet(pos, vel utils.Vec2, rotation float64) *BeeBullet {
 	bullet := BeeBullet{}
 
 	bullet.Damage = 3
+	bullet.Lifttime = 100
 
 	bullet.Position = pos
 	bullet.Vel = vel

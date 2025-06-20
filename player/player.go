@@ -21,7 +21,8 @@ type PlayerStruct struct {
 }
 
 func (player *PlayerStruct) Update() {
-	gun.Player_Pos = player.Pos
+	gun.Player_Pos = &player.Pos
+	gun.Player_Vel = &player.Vel
 
 	player.Vel.Y += 0.1
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"main/gun"
 	"main/level"
 	"main/music"
 	"main/player"
@@ -27,6 +28,14 @@ func (g *Game) Update() error {
 	rmx, rmy := ebiten.CursorPosition()
 	utils.Mouse_X = float64(rmx)
 	utils.Mouse_Y = float64(rmy)
+
+	if ebiten.IsKeyPressed(ebiten.Key1) {
+		player.Player.Gun = gun.CreateNerfGun()
+	} else if ebiten.IsKeyPressed(ebiten.Key2) {
+		player.Player.Gun = gun.CreateBeeGun()
+	} else if ebiten.IsKeyPressed(ebiten.Key3) {
+		player.Player.Gun = gun.CreateTwinMagGun()
+	}
 
 	player.Player.Update()
 

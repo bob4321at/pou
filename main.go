@@ -35,6 +35,8 @@ func (g *Game) Update() error {
 		player.Player.Gun = gun.CreateBeeGun()
 	} else if ebiten.IsKeyPressed(ebiten.Key3) {
 		player.Player.Gun = gun.CreateTwinMagGun()
+	} else if ebiten.IsKeyPressed(ebiten.Key4) {
+		player.Player.Gun = gun.CreateShotgun()
 	}
 
 	player.Player.Update()

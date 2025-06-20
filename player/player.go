@@ -98,7 +98,7 @@ func NewPlayer(pos utils.Vec2) (player PlayerStruct) {
 	player.Pos = pos
 
 	player.img = textures.NewTexture("./art/player.png", "")
-	player.Gun = gun.CreateTwinMagGun()
+	player.Gun = gun.CreateShotgun()
 
 	return player
 }

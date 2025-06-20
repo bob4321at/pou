@@ -120,8 +120,8 @@ func (gun *BeeGun) Shoot() {
 	if gun.Cooldown < 0 {
 		if music.AtPeak {
 			gun.Bullets = append(gun.Bullets, CreateBeeBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot)), Y: math.Sin(utils.Deg2Rad(gun.Rot))}, gun.Rot))
-			gun.Bullets = append(gun.Bullets, CreateBeeBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot + 10)), Y: math.Sin(utils.Deg2Rad(gun.Rot + 10))}, gun.Rot+10))
-			gun.Bullets = append(gun.Bullets, CreateBeeBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot - 10)), Y: math.Sin(utils.Deg2Rad(gun.Rot - 10))}, gun.Rot-10))
+			gun.Bullets = append(gun.Bullets, CreateBeeBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot + 30)), Y: math.Sin(utils.Deg2Rad(gun.Rot + 30))}, gun.Rot+30))
+			gun.Bullets = append(gun.Bullets, CreateBeeBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot - 30)), Y: math.Sin(utils.Deg2Rad(gun.Rot - 30))}, gun.Rot-30))
 			gun.Cooldown = 5
 		} else {
 			gun.Bullets = append(gun.Bullets, CreateBeeBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot)), Y: math.Sin(utils.Deg2Rad(gun.Rot))}, gun.Rot))
@@ -156,6 +156,7 @@ func (gun *BeeGun) Update() {
 		if bullet.CheckRemoval() {
 			if bullet_index < len(gun.Bullets) {
 				utils.RemoveArrayElement(bullet_index, &gun.Bullets)
+				break
 			}
 		}
 	}

@@ -126,6 +126,7 @@ func (gun *NerfGun) Update() {
 
 		if bullet.CheckRemoval() {
 			utils.RemoveArrayElement(bullet_index, &gun.Bullets)
+			break
 		}
 	}
 }

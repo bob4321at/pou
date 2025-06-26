@@ -1,6 +1,8 @@
 package utils
 
-import "math"
+import (
+	"math"
+)
 
 var Mouse_X float64
 var Mouse_Y float64

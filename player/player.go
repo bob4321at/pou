@@ -21,6 +21,13 @@ type PlayerStruct struct {
 }
 
 func (player *PlayerStruct) Update() {
+	if !level.Temp_Level.Player_Loaded {
+		player.Vel.X = 0
+		player.Vel.Y = 0
+		player.Pos = level.Temp_Level.Player_Spawn
+		level.Temp_Level.Player_Loaded = true
+	}
+
 	gun.Player_Pos = &player.Pos
 	gun.Player_Vel = &player.Vel
 
@@ -39,18 +46,22 @@ func (player *PlayerStruct) Update() {
 		}
 	}
 
+	if ebiten.IsKeyPressed(ebiten.KeyT) {
+		player.Pos = level.Temp_Level.Tiles[0].Pos
+	}
+
 	if player.Vel.X > 0 {
 		player.Dir = false
 	} else {
 		player.Dir = true
 	}
 
-	collision_x, _, _ := level.Temp_Level.CheckCollision(utils.Vec2{X: player.Pos.X + player.Vel.X + 640/2 - 16, Y: player.Pos.Y + 360/2 - 24}, utils.Vec2{X: 32, Y: 48})
+	collision_x, _ := level.Temp_Level.CheckCollision(utils.Vec2{X: player.Pos.X + player.Vel.X + 640/2 - 14, Y: player.Pos.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42})
 	if collision_x {
 		player.Vel.X = 0
 	}
 
-	collision_y, _, _ := level.Temp_Level.CheckCollision(utils.Vec2{X: player.Pos.X + 640/2 - 16, Y: player.Pos.Y + player.Vel.Y + 360/2 - 24}, utils.Vec2{X: 32, Y: 48})
+	collision_y, _ := level.Temp_Level.CheckCollision(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42})
 	if collision_y {
 		if player.Vel.Y > 0 {
 			player.Vel.Y = 0

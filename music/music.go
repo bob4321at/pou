@@ -79,7 +79,7 @@ func NewMusic(path string) (music MusicStruct) {
 	}
 
 	for _, frame := range data {
-		if frame.Volume > 0.2 {
+		if frame.Volume > 0.3 {
 			music.Peaks = append(music.Peaks, frame)
 		}
 	}
@@ -104,7 +104,7 @@ func NewMusic(path string) (music MusicStruct) {
 			AtPeak = false
 
 			for _, frame := range music.Peaks {
-				if frame.Frame >= int(utils.GameTime-1.3) && frame.Frame <= int(utils.GameTime+1.3) {
+				if frame.Frame >= int(utils.GameTime-1.4) && frame.Frame <= int(utils.GameTime+1.4) {
 					AtPeak = true
 				}
 			}

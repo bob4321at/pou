@@ -13,20 +13,45 @@ type Tile struct {
 	Pos utils.Vec2
 }
 
+type EnemySpawner struct {
+	Pos     utils.Vec2
+	Enemies []int
+	Timer   float64
+	Index   int
+}
+
 type Level struct {
-	Tiles         []Tile
-	TileSet_Img   *ebiten.Image
-	TileSet       []*ebiten.Image
-	Enemies       []enemies.Enemy
-	Player_Loaded bool
-	Player_Spawn  utils.Vec2
+	Tiles          []Tile
+	TileSet_Img    *ebiten.Image
+	TileSet        []*ebiten.Image
+	Enemies        []enemies.Enemy
+	Player_Loaded  bool
+	Player_Spawn   utils.Vec2
+	Enemy_Spawners []EnemySpawner
 }
 
 func (level *Level) Update() {
+	for i := range level.Enemy_Spawners {
+		spawner := &level.Enemy_Spawners[i]
+		if spawner.Timer > 0 {
+			spawner.Timer -= 0.1
+		} else {
+			spawner.Timer = 10
+
+			if spawner.Index < len(spawner.Enemies) {
+				level.Enemies = append(level.Enemies, enemies.EnemySpawnFuncs[spawner.Enemies[spawner.Index]](spawner.Pos))
+				spawner.Index += 1
+			}
+		}
+	}
+
 	for i, enemy := range level.Enemies {
-		enemy.Update()
-		if enemy.GetHealth() <= 0 {
-			utils.RemoveArrayElement(i, &level.Enemies)
+		if i < len(level.Enemies) {
+			enemy.Update()
+
+			if enemy.GetHealth() <= 0 {
+				utils.RemoveArrayElement(i, &level.Enemies)
+			}
 		}
 	}
 }

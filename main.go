@@ -1,13 +1,16 @@
 package main
 
 import (
+	"image/color"
 	"main/gun"
 	"main/level"
 	"main/music"
 	"main/player"
+	"main/shaders"
 	"main/utils"
 	"strconv"
 
+	"github.com/bob4321at/textures"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
@@ -48,16 +51,22 @@ func (g *Game) Update() error {
 	return nil
 }
 
-func (g *Game) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, strconv.Itoa(int(ebiten.ActualFPS())))
+func (g *Game) Draw(display *ebiten.Image) {
+	display.Fill(color.RGBA{255, 217, 217, 255})
 
-	level.Temp_Level.Draw(screen)
+	screen := textures.NewTexture("./art/display.png", shaders.Test_Refraction_Shader)
 
-	player.Player.Draw(screen)
+	ebitenutil.DebugPrint(screen.Img, strconv.Itoa(int(ebiten.ActualFPS())))
+
+	level.Temp_Level.Draw(screen.Img)
+
+	player.Player.Draw(screen.Img)
 
 	if music.AtPeak {
-		screen.DrawImage(Shoot_Now_Ui, &ebiten.DrawImageOptions{})
+		screen.Img.DrawImage(Shoot_Now_Ui, &ebiten.DrawImageOptions{})
 	}
+
+	screen.Draw(display, &ebiten.DrawImageOptions{})
 }
 
 func (g *Game) Layout(ow, oh int) (sw, sh int) {

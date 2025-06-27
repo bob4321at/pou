@@ -2,6 +2,7 @@ package player
 
 import (
 	"main/camera"
+	"main/enemies"
 	"main/gun"
 	"main/level"
 	"main/utils"
@@ -30,6 +31,7 @@ func (player *PlayerStruct) Update() {
 
 	gun.Player_Pos = &player.Pos
 	gun.Player_Vel = &player.Vel
+	enemies.Player_Pos = &player.Pos
 
 	player.Vel.Y += 0.1
 
@@ -52,7 +54,7 @@ func (player *PlayerStruct) Update() {
 
 	if player.Vel.X > 0 {
 		player.Dir = false
-	} else {
+	} else if player.Vel.X < 0 {
 		player.Dir = true
 	}
 

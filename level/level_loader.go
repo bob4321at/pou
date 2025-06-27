@@ -3,6 +3,7 @@ package level
 import (
 	"encoding/json"
 	"image"
+	"main/enemies"
 	"main/utils"
 	"os"
 
@@ -15,9 +16,16 @@ type TileJson struct {
 	Pos utils.Vec2
 }
 
+type EnemySpawnerJson struct {
+	Pos     utils.Vec2
+	Enemies []int
+	Timer   float64
+}
+
 type LevelJson struct {
 	Player_Spawn utils.Vec2
 	Tiles        []TileJson
+	Enemies      []EnemySpawnerJson
 }
 
 func LoadLevel(level_name string) Level {
@@ -67,11 +75,17 @@ func LoadLevel(level_name string) Level {
 
 	for _, tile := range temp_level_json.Tiles {
 		temp_level_tiles = append(temp_level_tiles, Tile{level.TileSet[tile.ID-1], tile.Pos})
+		enemies.Level_Hitbox = append(enemies.Level_Hitbox, tile.Pos)
 	}
 
 	level.Tiles = temp_level_tiles
 	level.Player_Spawn = utils.Vec2{X: temp_level_json.Player_Spawn.X - 320, Y: temp_level_json.Player_Spawn.Y - 240}
 	level.Player_Loaded = false
+
+	level.Enemy_Spawners = nil
+	for _, spawner := range temp_level_json.Enemies {
+		level.Enemy_Spawners = append(level.Enemy_Spawners, EnemySpawner{spawner.Pos, spawner.Enemies, 10, 0})
+	}
 
 	return level
 }

@@ -56,7 +56,7 @@ func (target *Target) GetHealth() int {
 	return target.Health
 }
 
-func NewTarget(pos utils.Vec2) *Target {
+func NewTarget(pos utils.Vec2) Enemy {
 	target := Target{}
 	target.Pos = pos
 	target.Health = 10

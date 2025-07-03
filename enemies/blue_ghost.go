@@ -36,15 +36,15 @@ func (blue_ghost *BlueGhost) Update() {
 		blue_ghost.I_Frames = 0
 	}
 
-	if Player_Pos.X+320 > blue_ghost.Pos.X {
+	if Player_Pos.X+310 > blue_ghost.Pos.X {
 		blue_ghost.Vel.X += 0.1
-	} else if Player_Pos.X+320 < blue_ghost.Pos.X {
+	} else if Player_Pos.X+310 < blue_ghost.Pos.X {
 		blue_ghost.Vel.X -= 0.1
 	}
 
-	if Player_Pos.Y+240 > blue_ghost.Pos.Y {
+	if Player_Pos.Y+160 > blue_ghost.Pos.Y {
 		blue_ghost.Vel.Y += 0.1
-	} else if Player_Pos.Y+240 < blue_ghost.Pos.Y {
+	} else if Player_Pos.Y+160 < blue_ghost.Pos.Y {
 		blue_ghost.Vel.Y -= 0.1
 	}
 
@@ -79,8 +79,12 @@ func (blue_ghost *BlueGhost) GetSize() utils.Vec2 {
 	return utils.Vec2{X: float64(blue_ghost.Img.GetTexture().Bounds().Dx()), Y: float64(blue_ghost.Img.GetTexture().Bounds().Dy())}
 }
 
-func (orange_guy *BlueGhost) GetHealth() int {
-	return orange_guy.Health
+func (blue_ghost *BlueGhost) GetHealth() int {
+	return blue_ghost.Health
+}
+
+func (blue_ghost *BlueGhost) HitPlayer() {
+	*Player_Health -= 1
 }
 
 func NewBlueGhost(pos utils.Vec2) Enemy {
@@ -88,7 +92,7 @@ func NewBlueGhost(pos utils.Vec2) Enemy {
 	blue_ghost.Pos = pos
 	blue_ghost.Health = 10
 
-	blue_ghost.Img = textures.NewTexture("./art/enemies/blue_ghost.png", shaders.Enemy_Shader)
+	blue_ghost.Img = textures.NewTexture("./art/enemies/blue_ghost.png", shaders.Flash_Shader)
 
 	return &blue_ghost
 }

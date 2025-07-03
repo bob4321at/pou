@@ -56,12 +56,14 @@ func (target *Target) GetHealth() int {
 	return target.Health
 }
 
+func (target *Target) HitPlayer() {}
+
 func NewTarget(pos utils.Vec2) Enemy {
 	target := Target{}
 	target.Pos = pos
 	target.Health = 10
 
-	target.Img = textures.NewTexture("./art/target.png", shaders.Enemy_Shader)
+	target.Img = textures.NewTexture("./art/target.png", shaders.Flash_Shader)
 
 	return &target
 }

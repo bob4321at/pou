@@ -19,13 +19,19 @@ type TileJson struct {
 type EnemySpawnerJson struct {
 	Pos     utils.Vec2
 	Enemies []int
-	Timer   float64
+	Signal  int
+}
+
+type BreakableTileJson struct {
+	Pos    utils.Vec2
+	Signal int
 }
 
 type LevelJson struct {
-	Player_Spawn utils.Vec2
-	Tiles        []TileJson
-	Enemies      []EnemySpawnerJson
+	Player_Spawn  utils.Vec2
+	Tiles         []TileJson
+	Enemies       []EnemySpawnerJson
+	BreakableTile []BreakableTileJson
 }
 
 func LoadLevel(level_name string) Level {
@@ -84,7 +90,16 @@ func LoadLevel(level_name string) Level {
 
 	level.Enemy_Spawners = nil
 	for _, spawner := range temp_level_json.Enemies {
-		level.Enemy_Spawners = append(level.Enemy_Spawners, EnemySpawner{spawner.Pos, spawner.Enemies, 10, 0})
+		level.Enemy_Spawners = append(level.Enemy_Spawners, EnemySpawner{spawner.Pos, spawner.Enemies, nil, 10, 0, Signal{spawner.Signal, false}})
+	}
+
+	level.BreakableTile = nil
+	breakable_tile_img, _, err := ebitenutil.NewImageFromFile("./levels/" + level_name + "/breakable_tile.png")
+	if err != nil {
+		panic(err)
+	}
+	for _, breakable_tile := range temp_level_json.BreakableTile {
+		level.BreakableTile = append(level.BreakableTile, BreakableTile{breakable_tile.Pos, breakable_tile.Signal, false, breakable_tile_img})
 	}
 
 	return level

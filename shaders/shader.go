@@ -1,6 +1,6 @@
 package shaders
 
-var Enemy_Shader = `//kage:unit pixels
+var Flash_Shader = `//kage:unit pixels
 			package main
 
 			var I float

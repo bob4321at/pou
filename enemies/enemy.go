@@ -10,6 +10,7 @@ type Enemy interface {
 	Draw(screen *ebiten.Image)
 	Update()
 	Hit(damage int)
+	HitPlayer()
 	GetPosition() utils.Vec2
 	GetSize() utils.Vec2
 	GetHealth() int
@@ -24,6 +25,7 @@ var EnemySpawnFuncs = map[int]func(pos utils.Vec2) Enemy{
 var Level_Hitbox []utils.Vec2
 
 var Player_Pos *utils.Vec2
+var Player_Health *int
 
 func CheckLevelCollision(pos utils.Vec2, size utils.Vec2) (bool, utils.Vec2) {
 	hit := false

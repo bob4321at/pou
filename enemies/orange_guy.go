@@ -77,12 +77,14 @@ func (orange_guy *OrangeGuy) GetHealth() int {
 	return orange_guy.Health
 }
 
+func (orange_guy *OrangeGuy) HitPlayer() {}
+
 func NewOrangeGuy(pos utils.Vec2) Enemy {
 	orange_guy := OrangeGuy{}
 	orange_guy.Pos = pos
 	orange_guy.Health = 10
 
-	orange_guy.Img = textures.NewTexture("./art/enemies/orange_guy.png", shaders.Enemy_Shader)
+	orange_guy.Img = textures.NewTexture("./art/enemies/orange_guy.png", shaders.Flash_Shader)
 
 	return &orange_guy
 }

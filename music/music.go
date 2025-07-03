@@ -114,5 +114,3 @@ func NewMusic(path string) (music MusicStruct) {
 
 	return music
 }
-
-var Music = NewMusic("./music/song.mp3")

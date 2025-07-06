@@ -22,6 +22,7 @@ func (spawner *EnemySpawner) Update() {
 
 		if spawner.Index < len(spawner.Enemies) {
 			spawner.Responsible_For = append(spawner.Responsible_For, enemies.EnemySpawnFuncs[spawner.Enemies[spawner.Index]](spawner.Pos))
+			spawner.Responsible_For = append(spawner.Responsible_For, enemies.EnemySpawnFuncs[spawner.Enemies[spawner.Index]](spawner.Pos))
 			spawner.Index += 1
 		}
 	}

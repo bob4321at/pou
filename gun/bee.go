@@ -4,7 +4,7 @@ import (
 	"main/camera"
 	"main/enemies"
 	"main/level"
-	"main/music"
+	"main/shaders"
 	"main/utils"
 	"math"
 
@@ -23,22 +23,22 @@ type BeeBullet struct {
 	Lifttime float64
 }
 
-func (bullet *BeeBullet) Update() {
+func (bullet *BeeBullet) Update(current_level *level.Level) {
 	bullet.Img.Update()
 
 	bullet.Vel.X = math.Cos(utils.Deg2Rad(bullet.Rotation))
 	bullet.Vel.Y = math.Sin(utils.Deg2Rad(bullet.Rotation))
 
-	if len(level.Temp_Level.Enemies) != 0 {
+	if len(current_level.Enemies) != 0 {
 		var closest_enemy enemies.Enemy
 		closest_enemy_distance := -1.0
 
-		closest_enemy = level.Temp_Level.Enemies[0]
+		closest_enemy = current_level.Enemies[0]
 		closest_enemy_distance = math.Abs(utils.GetDist(bullet.Position, closest_enemy.GetPosition()))
 
-		for ei, enemy := range level.Temp_Level.Enemies {
+		for ei, enemy := range current_level.Enemies {
 			if math.Abs(utils.GetDist(bullet.Position, enemy.GetPosition())) < closest_enemy_distance {
-				closest_enemy = level.Temp_Level.Enemies[ei]
+				closest_enemy = current_level.Enemies[ei]
 				closest_enemy_distance = math.Abs(utils.GetDist(bullet.Position, enemy.GetPosition()))
 			}
 		}
@@ -111,14 +111,15 @@ type BeeGun struct {
 	Rot     float64
 
 	Cooldown float64
+	Charge   int
 
 	Rendering_Rot float64
 	Img           textures.RenderableTexture
 }
 
-func (gun *BeeGun) Shoot() {
+func (gun *BeeGun) Shoot(Charged int) {
 	if gun.Cooldown < 0 {
-		if music.AtPeak {
+		if Charged > gun.Charge {
 			gun.Bullets = append(gun.Bullets, CreateBeeBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot)), Y: math.Sin(utils.Deg2Rad(gun.Rot))}, gun.Rot))
 			gun.Bullets = append(gun.Bullets, CreateBeeBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot + 30)), Y: math.Sin(utils.Deg2Rad(gun.Rot + 30))}, gun.Rot+30))
 			gun.Bullets = append(gun.Bullets, CreateBeeBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot - 30)), Y: math.Sin(utils.Deg2Rad(gun.Rot - 30))}, gun.Rot-30))
@@ -130,7 +131,7 @@ func (gun *BeeGun) Shoot() {
 	}
 }
 
-func (gun *BeeGun) Update() {
+func (gun *BeeGun) Update(current_level *level.Level) {
 	if gun.Cooldown >= 0 {
 		gun.Cooldown -= 0.1
 	}
@@ -144,9 +145,9 @@ func (gun *BeeGun) Update() {
 	}
 
 	for bullet_index, bullet := range gun.Bullets {
-		bullet.Update()
-		for i := range level.Temp_Level.Enemies {
-			enemy := level.Temp_Level.Enemies[i]
+		bullet.Update(current_level)
+		for i := range current_level.Enemies {
+			enemy := current_level.Enemies[i]
 			if bullet.Collide(enemy.GetPosition(), enemy.GetSize()) {
 				enemy.Hit(bullet.GetDamage())
 			}
@@ -174,6 +175,10 @@ func (gun *BeeGun) Draw(screen *ebiten.Image) {
 
 	op.GeoM.Translate(640/2, 360/2)
 
+	gun.Img.SetUniforms(map[string]any{
+		"I": Player_I_Frames,
+	})
+
 	gun.Img.Draw(screen, &op)
 
 	for i := range gun.Bullets {
@@ -185,10 +190,19 @@ func (gun *BeeGun) GetImg() textures.RenderableTexture {
 	return gun.Img
 }
 
+func (gun *BeeGun) GetCharge() int {
+	return gun.Charge
+}
+
+func (gun *BeeGun) CanShoot() bool {
+	return gun.Cooldown <= 0
+}
+
 func CreateBeeGun() *BeeGun {
 	gun := BeeGun{}
 
-	gun.Img = textures.NewTexture("./art/guns/beegun/gun.png", "")
+	gun.Img = textures.NewTexture("./art/guns/beegun/gun.png", shaders.Flash_Shader)
+	gun.Charge = 30
 
 	return &gun
 }

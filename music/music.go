@@ -2,8 +2,6 @@ package music
 
 import (
 	"bytes"
-	"io"
-	"main/utils"
 	"os"
 	"time"
 
@@ -11,21 +9,13 @@ import (
 	"github.com/hajimehoshi/go-mp3"
 )
 
-var AtPeak bool
-
-type VolumePoint struct {
-	Frame  int
-	Volume float64
-}
-
 type MusicStruct struct {
 	Context  *oto.Context
 	Player   *oto.Player
 	Filepath string
+	reset    bool
 
 	MPThree *mp3.Decoder
-	Peaks   []VolumePoint
-	AtPeak  bool
 }
 
 func (music *MusicStruct) PlaySong(path string) {
@@ -45,6 +35,10 @@ func (music *MusicStruct) PlaySong(path string) {
 	music.Player.Play()
 }
 
+func (music *MusicStruct) Reset() {
+	music.reset = true
+}
+
 func NewMusic(path string) (music MusicStruct) {
 	music.Filepath = path
 
@@ -58,30 +52,6 @@ func NewMusic(path string) (music MusicStruct) {
 	music.MPThree, err = mp3.NewDecoder(fileBytesReader)
 	if err != nil {
 		panic(err)
-	}
-
-	var data []VolumePoint
-	frame := 0
-	buf := make([]byte, 4096)
-
-	for {
-		n, err := music.MPThree.Read(buf)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			panic(err)
-		}
-
-		volume := utils.CalculateVolume(buf[:n])
-		data = append(data, VolumePoint{Frame: frame, Volume: volume})
-		frame++
-	}
-
-	for _, frame := range data {
-		if frame.Volume > 0.3 {
-			music.Peaks = append(music.Peaks, frame)
-		}
 	}
 
 	op := &oto.NewContextOptions{}
@@ -100,13 +70,9 @@ func NewMusic(path string) (music MusicStruct) {
 		music.PlaySong(path)
 		for music.Player.IsPlaying() {
 			time.Sleep(time.Millisecond)
-
-			AtPeak = false
-
-			for _, frame := range music.Peaks {
-				if frame.Frame >= int(utils.GameTime-1.4) && frame.Frame <= int(utils.GameTime+1.4) {
-					AtPeak = true
-				}
+			if music.reset {
+				music.Player.Close()
+				music.reset = false
 			}
 		}
 		music.Player.Close()

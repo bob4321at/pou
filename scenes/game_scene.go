@@ -16,11 +16,12 @@ import (
 )
 
 type GameScene struct {
-	Shoot_Now_Ui *ebiten.Image
-	SetedUp      bool
-	Music        music.MusicStruct
-	Player       player.PlayerStruct
-	Screen       *textures.Texture
+	Shoot_Now_Ui  *ebiten.Image
+	SetedUp       bool
+	Music         music.MusicStruct
+	Player        player.PlayerStruct
+	Screen        *textures.Texture
+	Current_Level level.Level
 }
 
 func (scene *GameScene) Setup() {
@@ -32,6 +33,8 @@ func (scene *GameScene) Setup() {
 	scene.Music = music.NewMusic("./music/song.mp3")
 
 	scene.Screen = textures.NewTexture("./art/display.png", shaders.Test_Refraction_Shader)
+
+	scene.Current_Level = level.LoadLevel("test")
 
 	scene.Player = player.NewPlayer(utils.Vec2{X: 100, Y: 100})
 
@@ -47,13 +50,26 @@ func (scene *GameScene) Update() {
 		scene.Player.Gun = gun.CreateTwinMagGun()
 	} else if ebiten.IsKeyPressed(ebiten.Key4) {
 		scene.Player.Gun = gun.CreateShotgun()
+	} else if ebiten.IsKeyPressed(ebiten.Key5) {
+		scene.Player.Gun = gun.CreateMechaGun()
 	}
 
-	scene.Player.Update()
+	if scene.Player.Health <= 0 {
+		scene.Reset()
+		Current_Scene_Id = 2
+	}
 
-	level.Temp_Level.Update()
+	scene.Player.Update(&scene.Current_Level)
+
+	scene.Current_Level.Update()
 
 	utils.GameTime += 1
+}
+
+func (scene *GameScene) Reset() {
+	scene.Current_Level.Reset()
+	scene.Player.Reset(scene.Current_Level.Player_Spawn)
+	scene.Music.Reset()
 }
 
 func (scene *GameScene) Draw(display *ebiten.Image) {
@@ -61,13 +77,9 @@ func (scene *GameScene) Draw(display *ebiten.Image) {
 
 	scene.Screen.Img.Fill(color.RGBA{0, 0, 0, 0})
 
-	level.Temp_Level.Draw(scene.Screen.Img)
+	scene.Current_Level.Draw(scene.Screen.Img)
 
 	scene.Player.Draw(scene.Screen.Img)
-
-	if music.AtPeak {
-		scene.Screen.Img.DrawImage(scene.Shoot_Now_Ui, &ebiten.DrawImageOptions{})
-	}
 
 	scene.Screen.Draw(display, &ebiten.DrawImageOptions{})
 

@@ -3,7 +3,7 @@ package gun
 import (
 	"main/camera"
 	"main/level"
-	"main/music"
+	"main/shaders"
 	"main/utils"
 	"math"
 
@@ -21,7 +21,7 @@ type MechaBullet struct {
 	Remove   bool
 }
 
-func (bullet *MechaBullet) Update() {
+func (bullet *MechaBullet) Update(level *level.Level) {
 	bullet.Vel.X = math.Cos(utils.Deg2Rad(bullet.Rotation))
 	bullet.Vel.Y = math.Sin(utils.Deg2Rad(bullet.Rotation))
 
@@ -86,14 +86,15 @@ type MechaGun struct {
 	Rot     float64
 
 	Cooldown float64
+	Charge   int
 
 	Rendering_Rot float64
 	Img           textures.RenderableTexture
 }
 
-func (gun *MechaGun) Shoot() {
+func (gun *MechaGun) Shoot(Charged int) {
 	if gun.Cooldown < 0 {
-		if music.AtPeak {
+		if Charged > gun.Charge {
 			gun.Bullets = append(gun.Bullets, CreateMechaBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot)), Y: math.Sin(utils.Deg2Rad(gun.Rot))}, gun.Rot, true))
 			gun.Cooldown = 4
 		} else {
@@ -103,7 +104,7 @@ func (gun *MechaGun) Shoot() {
 	}
 }
 
-func (gun *MechaGun) Update() {
+func (gun *MechaGun) Update(current_level *level.Level) {
 	if gun.Cooldown >= 0 {
 		gun.Cooldown -= 0.1
 	}
@@ -117,9 +118,9 @@ func (gun *MechaGun) Update() {
 	}
 
 	for bullet_index, bullet := range gun.Bullets {
-		bullet.Update()
-		for i := range level.Temp_Level.Enemies {
-			enemy := level.Temp_Level.Enemies[i]
+		bullet.Update(current_level)
+		for i := range current_level.Enemies {
+			enemy := current_level.Enemies[i]
 			if bullet.Collide(enemy.GetPosition(), enemy.GetSize()) {
 				enemy.Hit(bullet.GetDamage())
 			}
@@ -145,6 +146,10 @@ func (gun *MechaGun) Draw(screen *ebiten.Image) {
 
 	op.GeoM.Translate(640/2, 360/2)
 
+	gun.Img.SetUniforms(map[string]any{
+		"I": Player_I_Frames,
+	})
+
 	gun.Img.Draw(screen, &op)
 
 	for i := range gun.Bullets {
@@ -156,10 +161,19 @@ func (gun *MechaGun) GetImg() textures.RenderableTexture {
 	return gun.Img
 }
 
+func (gun *MechaGun) GetCharge() int {
+	return gun.Charge
+}
+
+func (gun *MechaGun) CanShoot() bool {
+	return gun.Cooldown <= 0
+}
+
 func CreateMechaGun() *MechaGun {
 	gun := MechaGun{}
 
-	gun.Img = textures.NewTexture("./art/guns/mecha_gun/gun.png", "")
+	gun.Img = textures.NewTexture("./art/guns/mecha_gun/gun.png", shaders.Flash_Shader)
+	gun.Charge = 40
 
 	return &gun
 }

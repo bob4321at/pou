@@ -34,3 +34,24 @@ var Test_Refraction_Shader = `//kage:unit pixels
 		return col
 	}
 `
+
+var Fill_Shader = `//kage:unit pixels
+	package main
+
+	var Percent float
+
+	func Fragment(targetCoords vec4, srcPos vec2, _ vec4) vec4 {
+		// size := imageSrc0Size()
+		color := imageSrc0At(srcPos.xy)
+
+		aPercent := Percent
+
+		return vec4(color.xyz-(aPercent/2), color.w)
+
+		// if srcPos.y < size.y-(size.y*aPercent) {
+		// 	return vec4(color.x/2, color.y/2, color.z/2, color.w)
+		// } else {
+		// 	return color
+		// }
+	}
+`

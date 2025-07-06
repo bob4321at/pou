@@ -1,7 +1,6 @@
 package level
 
 import (
-	"fmt"
 	"main/camera"
 	"main/enemies"
 	"main/utils"
@@ -31,6 +30,8 @@ type Level struct {
 }
 
 func (level *Level) Update() {
+	enemies.Breakable_Tile_Hitboxes = nil
+
 	for i := range level.Enemy_Spawners {
 		spawner := &level.Enemy_Spawners[i]
 		spawner.Update()
@@ -39,6 +40,9 @@ func (level *Level) Update() {
 	for i := range level.BreakableTile {
 		breakable_tile := &level.BreakableTile[i]
 		breakable_tile.Update(level)
+		if !breakable_tile.active {
+			enemies.Breakable_Tile_Hitboxes = append(enemies.Breakable_Tile_Hitboxes, breakable_tile.Pos)
+		}
 	}
 
 	level.Enemies = nil
@@ -57,6 +61,8 @@ func (level *Level) Update() {
 			}
 		}
 	}
+
+	enemies.AllEnemies = level.Enemies
 }
 
 func (level *Level) Draw(screen *ebiten.Image) {
@@ -67,17 +73,34 @@ func (level *Level) Draw(screen *ebiten.Image) {
 		screen.DrawImage(tile.Img, &op)
 	}
 
+	for _, breakable_tile := range level.BreakableTile {
+		op := ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(breakable_tile.Pos.X)+(camera.Camera.Pos.X), float64(breakable_tile.Pos.Y)+(camera.Camera.Pos.Y))
+		if !breakable_tile.active {
+			screen.DrawImage(breakable_tile.Img, &op)
+		}
+	}
+
 	for i := range level.Enemy_Spawners {
 		spawner := &level.Enemy_Spawners[i]
 		for _, enemy := range spawner.Responsible_For {
 			enemy.Draw(screen)
 		}
 	}
+}
 
-	for _, breakable_tile := range level.BreakableTile {
-		op := ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(breakable_tile.Pos.X)+(camera.Camera.Pos.X), float64(breakable_tile.Pos.Y)+(camera.Camera.Pos.Y))
-		screen.DrawImage(breakable_tile.Img, &op)
+func (level *Level) Reset() {
+	level.Enemies = nil
+
+	for i := range level.Enemy_Spawners {
+		level.Enemy_Spawners[i].Index = 0
+		level.Enemy_Spawners[i].Responsible_For = nil
+		level.Enemy_Spawners[i].Timer = 10
+		level.Enemy_Spawners[i].Signal.Active = false
+	}
+
+	for i := range level.BreakableTile {
+		level.BreakableTile[i].active = false
 	}
 }
 
@@ -95,7 +118,6 @@ func (level *Level) CheckCollision(pos utils.Vec2, size utils.Vec2) (bool, utils
 	}
 
 	for _, breakable_tile := range level.BreakableTile {
-		fmt.Println(breakable_tile.active)
 		if !breakable_tile.active {
 			check := utils.Collide(pos, size, utils.Vec2{X: float64(breakable_tile.Pos.X), Y: float64(breakable_tile.Pos.Y)}, utils.Vec2{X: 32, Y: 32})
 
@@ -108,5 +130,3 @@ func (level *Level) CheckCollision(pos utils.Vec2, size utils.Vec2) (bool, utils
 
 	return hit, tile_pos
 }
-
-var Temp_Level = LoadLevel("test_real_level")

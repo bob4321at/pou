@@ -3,7 +3,7 @@ package gun
 import (
 	"main/camera"
 	"main/level"
-	"main/music"
+	"main/shaders"
 	"main/utils"
 	"math"
 
@@ -21,7 +21,7 @@ type TwinMagBullet struct {
 	Remove   bool
 }
 
-func (bullet *TwinMagBullet) Update() {
+func (bullet *TwinMagBullet) Update(current_level *level.Level) {
 	bullet.Position.X += bullet.Vel.X * 5
 	bullet.Position.Y += bullet.Vel.Y * 5
 }
@@ -76,7 +76,7 @@ type BigTwinMagBullet struct {
 	Remove   bool
 }
 
-func (bullet *BigTwinMagBullet) Update() {
+func (bullet *BigTwinMagBullet) Update(current_level *level.Level) {
 	bullet.Position.X += bullet.Vel.X * 5
 	bullet.Position.Y += bullet.Vel.Y * 5
 }
@@ -110,7 +110,7 @@ func (bullet *BigTwinMagBullet) CheckRemoval() bool {
 func CreateBigTwinMagBullet(pos, vel utils.Vec2, rotation float64) *BigTwinMagBullet {
 	bullet := BigTwinMagBullet{}
 
-	bullet.Damage = 5
+	bullet.Damage = 10
 
 	bullet.Position = pos
 	bullet.Vel = vel
@@ -126,14 +126,15 @@ type TwinMagGun struct {
 	Rot     float64
 
 	Cooldown float64
+	Charge   int
 
 	Rendering_Rot float64
 	Img           textures.RenderableTexture
 }
 
-func (gun *TwinMagGun) Shoot() {
+func (gun *TwinMagGun) Shoot(Charged int) {
 	if gun.Cooldown < 0 {
-		if music.AtPeak {
+		if Charged > gun.Charge {
 			gun.Bullets = append(gun.Bullets, CreateBigTwinMagBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot)), Y: math.Sin(utils.Deg2Rad(gun.Rot))}, gun.Rot))
 			gun.Cooldown = 3
 		} else {
@@ -144,7 +145,7 @@ func (gun *TwinMagGun) Shoot() {
 	}
 }
 
-func (gun *TwinMagGun) Update() {
+func (gun *TwinMagGun) Update(current_level *level.Level) {
 	if gun.Cooldown >= 0 {
 		gun.Cooldown -= 0.1
 	}
@@ -158,9 +159,9 @@ func (gun *TwinMagGun) Update() {
 	}
 
 	for bullet_index, bullet := range gun.Bullets {
-		bullet.Update()
-		for i := range level.Temp_Level.Enemies {
-			enemy := level.Temp_Level.Enemies[i]
+		bullet.Update(current_level)
+		for i := range current_level.Enemies {
+			enemy := current_level.Enemies[i]
 			if bullet.Collide(enemy.GetPosition(), enemy.GetSize()) {
 				enemy.Hit(bullet.GetDamage())
 			}
@@ -186,6 +187,10 @@ func (gun *TwinMagGun) Draw(screen *ebiten.Image) {
 
 	op.GeoM.Translate(640/2, 360/2)
 
+	gun.Img.SetUniforms(map[string]any{
+		"I": Player_I_Frames,
+	})
+
 	gun.Img.Draw(screen, &op)
 
 	for i := range gun.Bullets {
@@ -197,10 +202,19 @@ func (gun *TwinMagGun) GetImg() textures.RenderableTexture {
 	return gun.Img
 }
 
+func (gun *TwinMagGun) GetCharge() int {
+	return gun.Charge
+}
+
+func (gun *TwinMagGun) CanShoot() bool {
+	return gun.Cooldown <= 0
+}
+
 func CreateTwinMagGun() *TwinMagGun {
 	gun := TwinMagGun{}
 
-	gun.Img = textures.NewTexture("./art/guns/twinmag/gun.png", "")
+	gun.Img = textures.NewTexture("./art/guns/twinmag/gun.png", shaders.Flash_Shader)
+	gun.Charge = 30
 
 	return &gun
 }

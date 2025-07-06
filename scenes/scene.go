@@ -9,5 +9,5 @@ type Scene interface {
 	GetSetup() bool
 }
 
-var Scenes = []Scene{&Main_Menu_Scene{}, &GameScene{}}
+var Scenes = []Scene{&Main_Menu_Scene{}, &GameScene{}, &Death_Menu_scene{}}
 var Current_Scene_Id = 0

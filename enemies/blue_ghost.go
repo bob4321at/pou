@@ -60,6 +60,28 @@ func (blue_ghost *BlueGhost) Update() {
 		blue_ghost.Vel.Y = -3
 	}
 
+	blue_ghost_enemy := Enemy(blue_ghost)
+	for i := range AllEnemies {
+		enemy := AllEnemies[i]
+		_, ok := enemy.(*BlueGhost)
+		if ok {
+			if enemy != blue_ghost_enemy {
+				if utils.Collide(blue_ghost.Pos, blue_ghost.GetSize(), enemy.GetPosition(), enemy.GetSize()) {
+					if blue_ghost.Pos.X+(blue_ghost.GetSize().X/2) > enemy.GetPosition().X+(enemy.GetSize().X/2) {
+						blue_ghost.Vel.X = 1
+					} else {
+						blue_ghost.Vel.X = -1
+					}
+					if blue_ghost.Pos.Y+(blue_ghost.GetSize().Y/2) > enemy.GetPosition().Y+(enemy.GetSize().Y/2) {
+						blue_ghost.Vel.Y = 1
+					} else {
+						blue_ghost.Vel.Y = -1
+					}
+				}
+			}
+		}
+	}
+
 	blue_ghost.Pos.Y += blue_ghost.Vel.Y
 	blue_ghost.Pos.X += blue_ghost.Vel.X
 }

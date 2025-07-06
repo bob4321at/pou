@@ -3,7 +3,7 @@ package gun
 import (
 	"main/camera"
 	"main/level"
-	"main/music"
+	"main/shaders"
 	"main/utils"
 	"math"
 	"math/rand"
@@ -22,7 +22,7 @@ type ShotgunBullet struct {
 	Remove   bool
 }
 
-func (bullet *ShotgunBullet) Update() {
+func (bullet *ShotgunBullet) Update(current_level *level.Level) {
 	bullet.Position.X += bullet.Vel.X * 5
 	bullet.Position.Y += bullet.Vel.Y * 5
 }
@@ -72,25 +72,26 @@ type Shotgun struct {
 	Rot     float64
 
 	Cooldown float64
+	Charge   int
 
 	Rendering_Rot float64
 	Img           textures.RenderableTexture
 }
 
-func (gun *Shotgun) Shoot() {
+func (gun *Shotgun) Shoot(Charged int) {
 	if gun.Cooldown < 0 {
 		for _ = range 10 {
 			gun.Bullets = append(gun.Bullets, CreateShotgunBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot + (rand.Float64() * 10))), Y: math.Sin(utils.Deg2Rad(gun.Rot + (rand.Float64() * 10)))}, gun.Rot+(rand.Float64()*10)))
 		}
 		gun.Cooldown = 4
-		if music.AtPeak {
-			Player_Vel.Y = -math.Sin(utils.Deg2Rad(gun.Rot)) * 4
+		if Charged > gun.Charge {
+			Player_Vel.Y = -math.Sin(utils.Deg2Rad(gun.Rot)) * 5
 			Player_Vel.X = -math.Cos(utils.Deg2Rad(gun.Rot)) * 8
 		}
 	}
 }
 
-func (gun *Shotgun) Update() {
+func (gun *Shotgun) Update(current_level *level.Level) {
 	if gun.Cooldown >= 0 {
 		gun.Cooldown -= 0.1
 	}
@@ -104,9 +105,9 @@ func (gun *Shotgun) Update() {
 	}
 
 	for bullet_index, bullet := range gun.Bullets {
-		bullet.Update()
-		for i := range level.Temp_Level.Enemies {
-			enemy := level.Temp_Level.Enemies[i]
+		bullet.Update(current_level)
+		for i := range current_level.Enemies {
+			enemy := current_level.Enemies[i]
 			if bullet.Collide(enemy.GetPosition(), enemy.GetSize()) {
 				enemy.Hit(bullet.GetDamage())
 			}
@@ -132,6 +133,10 @@ func (gun *Shotgun) Draw(screen *ebiten.Image) {
 
 	op.GeoM.Translate(640/2, 360/2)
 
+	gun.Img.SetUniforms(map[string]any{
+		"I": Player_I_Frames,
+	})
+
 	gun.Img.Draw(screen, &op)
 
 	for i := range gun.Bullets {
@@ -143,10 +148,19 @@ func (gun *Shotgun) GetImg() textures.RenderableTexture {
 	return gun.Img
 }
 
+func (gun *Shotgun) GetCharge() int {
+	return gun.Charge
+}
+
+func (gun *Shotgun) CanShoot() bool {
+	return gun.Cooldown <= 0
+}
+
 func CreateShotgun() *Shotgun {
 	gun := Shotgun{}
 
-	gun.Img = textures.NewTexture("./art/guns/shotgun/gun.png", "")
+	gun.Img = textures.NewTexture("./art/guns/shotgun/gun.png", shaders.Flash_Shader)
+	gun.Charge = 30
 
 	return &gun
 }

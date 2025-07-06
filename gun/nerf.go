@@ -3,9 +3,10 @@ package gun
 import (
 	"main/camera"
 	"main/level"
-	"main/music"
+	"main/shaders"
 	"main/utils"
 	"math"
+	"time"
 
 	"github.com/bob4321at/textures"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -21,7 +22,7 @@ type NerfBullet struct {
 	Remove   bool
 }
 
-func (bullet *NerfBullet) Update() {
+func (bullet *NerfBullet) Update(current_level *level.Level) {
 	bullet.Vel.X = math.Cos(utils.Deg2Rad(bullet.Rotation))
 	bullet.Vel.Y = math.Sin(utils.Deg2Rad(bullet.Rotation))
 
@@ -84,24 +85,30 @@ type NerfGun struct {
 	Rot     float64
 
 	Cooldown float64
+	Charge   int
 
 	Rendering_Rot float64
 	Img           textures.RenderableTexture
 }
 
-func (gun *NerfGun) Shoot() {
+func (gun *NerfGun) Shoot(Charged int) {
 	if gun.Cooldown < 0 {
-		if music.AtPeak {
-			gun.Bullets = append(gun.Bullets, CreateNerfBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot)), Y: math.Sin(utils.Deg2Rad(gun.Rot))}, gun.Rot))
-			gun.Cooldown = 1
+		if Charged > gun.Charge {
+			go func() {
+				gun.Bullets = append(gun.Bullets, CreateNerfBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot)), Y: math.Sin(utils.Deg2Rad(gun.Rot))}, gun.Rot))
+				time.Sleep(time.Second / 6)
+				gun.Bullets = append(gun.Bullets, CreateNerfBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot)), Y: math.Sin(utils.Deg2Rad(gun.Rot))}, gun.Rot))
+				time.Sleep(time.Second / 6)
+				gun.Bullets = append(gun.Bullets, CreateNerfBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot)), Y: math.Sin(utils.Deg2Rad(gun.Rot))}, gun.Rot))
+			}()
 		} else {
 			gun.Bullets = append(gun.Bullets, CreateNerfBullet(utils.Vec2{X: Player_Pos.X + (640 / 2), Y: Player_Pos.Y + (360 / 2)}, utils.Vec2{X: math.Cos(utils.Deg2Rad(gun.Rot)), Y: math.Sin(utils.Deg2Rad(gun.Rot))}, gun.Rot))
-			gun.Cooldown = 4
 		}
+		gun.Cooldown = 4
 	}
 }
 
-func (gun *NerfGun) Update() {
+func (gun *NerfGun) Update(current_level *level.Level) {
 	if gun.Cooldown >= 0 {
 		gun.Cooldown -= 0.1
 	}
@@ -115,9 +122,9 @@ func (gun *NerfGun) Update() {
 	}
 
 	for bullet_index, bullet := range gun.Bullets {
-		bullet.Update()
-		for i := range level.Temp_Level.Enemies {
-			enemy := level.Temp_Level.Enemies[i]
+		bullet.Update(current_level)
+		for i := range current_level.Enemies {
+			enemy := current_level.Enemies[i]
 			if bullet.Collide(enemy.GetPosition(), enemy.GetSize()) {
 				enemy.Hit(bullet.GetDamage())
 			}
@@ -143,6 +150,10 @@ func (gun *NerfGun) Draw(screen *ebiten.Image) {
 
 	op.GeoM.Translate(640/2, 360/2)
 
+	gun.Img.SetUniforms(map[string]any{
+		"I": Player_I_Frames,
+	})
+
 	gun.Img.Draw(screen, &op)
 
 	for i := range gun.Bullets {
@@ -154,10 +165,19 @@ func (gun *NerfGun) GetImg() textures.RenderableTexture {
 	return gun.Img
 }
 
+func (gun *NerfGun) GetCharge() int {
+	return gun.Charge
+}
+
+func (gun *NerfGun) CanShoot() bool {
+	return gun.Cooldown <= 0
+}
+
 func CreateNerfGun() *NerfGun {
 	gun := NerfGun{}
 
-	gun.Img = textures.NewTexture("./art/guns/nerfgun/gun.png", "")
+	gun.Img = textures.NewTexture("./art/guns/nerfgun/gun.png", shaders.Flash_Shader)
+	gun.Charge = 20
 
 	return &gun
 }

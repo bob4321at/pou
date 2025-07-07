@@ -1,3 +1,3 @@
 # pou
 
-a 2D rhythm shooter
+a 2D shooter

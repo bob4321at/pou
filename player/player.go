@@ -183,7 +183,7 @@ func NewPlayer(pos utils.Vec2) (player PlayerStruct) {
 
 	player.Img = textures.NewAnimatedTexture("./art/player.png", shaders.Flash_Shader)
 	player.Charge_UI = textures.NewTexture("./art/ui/charge.png", shaders.Fill_Shader)
-	player.Gun = gun.CreateMechaGun()
+	player.Gun = gun.CreateFistGun()
 
 	player.Health = 100
 	player.Health_Bar_Img = ebiten.NewImage(250, 24)

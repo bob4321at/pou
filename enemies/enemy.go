@@ -18,8 +18,9 @@ type Enemy interface {
 
 var EnemySpawnFuncs = map[int]func(pos utils.Vec2) Enemy{
 	1: NewTarget,
-	2: NewOrangeGuy,
-	3: NewBlueGhost,
+	2: NewBlueGhost,
+	3: NewOrangeGuy,
+	4: NewDummy,
 }
 
 var Level_Hitbox []utils.Vec2

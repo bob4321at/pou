@@ -34,7 +34,7 @@ func (scene *GameScene) Setup() {
 
 	scene.Screen = textures.NewTexture("./art/display.png", shaders.Test_Refraction_Shader)
 
-	scene.Current_Level = level.LoadLevel("test")
+	scene.Current_Level = level.LoadLevel("test_real_level")
 
 	scene.Player = player.NewPlayer(utils.Vec2{X: 100, Y: 100})
 

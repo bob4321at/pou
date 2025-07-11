@@ -17,12 +17,18 @@ type TileJson struct {
 }
 
 type EnemySpawnerJson struct {
-	Pos     utils.Vec2
-	Enemies []int
-	Signal  int
+	Pos           utils.Vec2
+	Enemies       []int
+	SendSignal    int
+	ReceiveSignal int
 }
 
 type BreakableTileJson struct {
+	Pos    utils.Vec2
+	Signal int
+}
+
+type TriggerTileJson struct {
 	Pos    utils.Vec2
 	Signal int
 }
@@ -32,6 +38,7 @@ type LevelJson struct {
 	Tiles         []TileJson
 	Enemies       []EnemySpawnerJson
 	BreakableTile []BreakableTileJson
+	TriggerTile   []TriggerTileJson
 }
 
 func LoadLevel(level_name string) Level {
@@ -90,7 +97,11 @@ func LoadLevel(level_name string) Level {
 
 	level.Enemy_Spawners = nil
 	for _, spawner := range temp_level_json.Enemies {
-		level.Enemy_Spawners = append(level.Enemy_Spawners, EnemySpawner{spawner.Pos, spawner.Enemies, nil, 10, 0, Signal{spawner.Signal, false}})
+		if spawner.ReceiveSignal == 0 {
+			level.Enemy_Spawners = append(level.Enemy_Spawners, EnemySpawner{spawner.Pos, spawner.Enemies, nil, 10, 0, Signal{spawner.SendSignal, false}, Signal{spawner.ReceiveSignal, false}, true})
+		} else {
+			level.Enemy_Spawners = append(level.Enemy_Spawners, EnemySpawner{spawner.Pos, spawner.Enemies, nil, 10, 0, Signal{spawner.SendSignal, false}, Signal{spawner.ReceiveSignal, false}, false})
+		}
 	}
 
 	level.BreakableTile = nil
@@ -100,6 +111,11 @@ func LoadLevel(level_name string) Level {
 	}
 	for _, breakable_tile := range temp_level_json.BreakableTile {
 		level.BreakableTile = append(level.BreakableTile, BreakableTile{breakable_tile.Pos, breakable_tile.Signal, false, breakable_tile_img})
+	}
+
+	level.TriggerTile = nil
+	for _, trigger_tile := range temp_level_json.TriggerTile {
+		level.TriggerTile = append(level.TriggerTile, TriggerTile{trigger_tile.Pos, trigger_tile.Signal, false})
 	}
 
 	return level

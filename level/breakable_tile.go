@@ -9,15 +9,22 @@ import (
 type BreakableTile struct {
 	Pos    utils.Vec2
 	Signal int
-	active bool
+	Active bool
 	Img    *ebiten.Image
 }
 
 func (tile *BreakableTile) Update(level *Level) {
 	for _, spawner := range level.Enemy_Spawners {
-		if spawner.Signal.Id == tile.Signal {
-			if spawner.Signal.Active {
-				tile.active = true
+		if spawner.SendSignal.Id == tile.Signal {
+			if spawner.SendSignal.Active {
+				tile.Active = true
+			}
+		}
+	}
+	for _, trigger := range level.TriggerTile {
+		if trigger.Signal == tile.Signal {
+			if trigger.Active {
+				tile.Active = true
 			}
 		}
 	}

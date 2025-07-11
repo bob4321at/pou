@@ -46,6 +46,7 @@ func (g *Game) Layout(ow, oh int) (sw, sh int) {
 func main() {
 	ebiten.SetWindowSize(1920, 1080)
 	ebiten.SetCursorMode(ebiten.CursorModeHidden)
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		panic(err)

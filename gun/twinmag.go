@@ -110,7 +110,7 @@ func (bullet *BigTwinMagBullet) CheckRemoval() bool {
 func CreateBigTwinMagBullet(pos, vel utils.Vec2, rotation float64) *BigTwinMagBullet {
 	bullet := BigTwinMagBullet{}
 
-	bullet.Damage = 10
+	bullet.Damage = 4
 
 	bullet.Position = pos
 	bullet.Vel = vel

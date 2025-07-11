@@ -1,6 +1,7 @@
 package level
 
 import (
+	"image/color"
 	"main/camera"
 	"main/enemies"
 	"main/utils"
@@ -26,6 +27,7 @@ type Level struct {
 	Player_Spawn   utils.Vec2
 	Enemy_Spawners []EnemySpawner
 	BreakableTile  []BreakableTile
+	TriggerTile    []TriggerTile
 	Enemies        []enemies.Enemy
 }
 
@@ -34,13 +36,13 @@ func (level *Level) Update() {
 
 	for i := range level.Enemy_Spawners {
 		spawner := &level.Enemy_Spawners[i]
-		spawner.Update()
+		spawner.Update(level)
 	}
 
 	for i := range level.BreakableTile {
 		breakable_tile := &level.BreakableTile[i]
 		breakable_tile.Update(level)
-		if !breakable_tile.active {
+		if !breakable_tile.Active {
 			enemies.Breakable_Tile_Hitboxes = append(enemies.Breakable_Tile_Hitboxes, breakable_tile.Pos)
 		}
 	}
@@ -76,9 +78,23 @@ func (level *Level) Draw(screen *ebiten.Image) {
 	for _, breakable_tile := range level.BreakableTile {
 		op := ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(breakable_tile.Pos.X)+(camera.Camera.Pos.X), float64(breakable_tile.Pos.Y)+(camera.Camera.Pos.Y))
-		if !breakable_tile.active {
+		if !breakable_tile.Active {
 			screen.DrawImage(breakable_tile.Img, &op)
 		}
+	}
+
+	for _, trigger_tile := range level.TriggerTile {
+		op := ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(trigger_tile.Pos.X)+(camera.Camera.Pos.X), float64(trigger_tile.Pos.Y)+(camera.Camera.Pos.Y))
+
+		img := ebiten.NewImage(32, 32)
+		if !trigger_tile.Active {
+			img.Fill(color.RGBA{255, 0, 0, 255})
+		} else {
+			img.Fill(color.RGBA{0, 255, 0, 255})
+		}
+
+		screen.DrawImage(img, &op)
 	}
 
 	for i := range level.Enemy_Spawners {
@@ -96,11 +112,11 @@ func (level *Level) Reset() {
 		level.Enemy_Spawners[i].Index = 0
 		level.Enemy_Spawners[i].Responsible_For = nil
 		level.Enemy_Spawners[i].Timer = 10
-		level.Enemy_Spawners[i].Signal.Active = false
+		level.Enemy_Spawners[i].SendSignal.Active = false
 	}
 
 	for i := range level.BreakableTile {
-		level.BreakableTile[i].active = false
+		level.BreakableTile[i].Active = false
 	}
 }
 
@@ -118,7 +134,7 @@ func (level *Level) CheckCollision(pos utils.Vec2, size utils.Vec2) (bool, utils
 	}
 
 	for _, breakable_tile := range level.BreakableTile {
-		if !breakable_tile.active {
+		if !breakable_tile.Active {
 			check := utils.Collide(pos, size, utils.Vec2{X: float64(breakable_tile.Pos.X), Y: float64(breakable_tile.Pos.Y)}, utils.Vec2{X: 32, Y: 32})
 
 			if check {

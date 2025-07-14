@@ -1,7 +1,6 @@
 package level
 
 import (
-	"image/color"
 	"main/camera"
 	"main/enemies"
 	"main/utils"
@@ -25,6 +24,8 @@ type Level struct {
 	TileSet        []*ebiten.Image
 	Player_Loaded  bool
 	Player_Spawn   utils.Vec2
+	End_Pos        utils.Vec2
+	Sock_Img       *ebiten.Image
 	Enemy_Spawners []EnemySpawner
 	BreakableTile  []BreakableTile
 	TriggerTile    []TriggerTile
@@ -68,6 +69,10 @@ func (level *Level) Update() {
 }
 
 func (level *Level) Draw(screen *ebiten.Image) {
+	op := ebiten.DrawImageOptions{}
+	op.GeoM.Translate(level.End_Pos.X+camera.Camera.Pos.X, level.End_Pos.Y+camera.Camera.Pos.Y)
+	screen.DrawImage(level.Sock_Img, &op)
+
 	for _, tile := range level.Tiles {
 		op := ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(tile.Pos.X)+(camera.Camera.Pos.X), float64(tile.Pos.Y)+(camera.Camera.Pos.Y))
@@ -81,20 +86,6 @@ func (level *Level) Draw(screen *ebiten.Image) {
 		if !breakable_tile.Active {
 			screen.DrawImage(breakable_tile.Img, &op)
 		}
-	}
-
-	for _, trigger_tile := range level.TriggerTile {
-		op := ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(trigger_tile.Pos.X)+(camera.Camera.Pos.X), float64(trigger_tile.Pos.Y)+(camera.Camera.Pos.Y))
-
-		img := ebiten.NewImage(32, 32)
-		if !trigger_tile.Active {
-			img.Fill(color.RGBA{255, 0, 0, 255})
-		} else {
-			img.Fill(color.RGBA{0, 255, 0, 255})
-		}
-
-		screen.DrawImage(img, &op)
 	}
 
 	for i := range level.Enemy_Spawners {

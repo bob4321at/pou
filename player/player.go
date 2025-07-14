@@ -30,6 +30,8 @@ type PlayerStruct struct {
 	I_Frames        float64
 
 	Charged int
+
+	Won bool
 }
 
 func (player *PlayerStruct) Update(current_level *level.Level) {
@@ -133,6 +135,10 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 		}
 	}
 
+	if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42}, current_level.End_Pos, utils.Vec2{X: 32, Y: 32}) {
+		player.Won = true
+	}
+
 	camera.Camera.Pos.X = -player.Pos.X
 	camera.Camera.Pos.Y = -player.Pos.Y
 
@@ -184,6 +190,8 @@ func (player *PlayerStruct) Reset(spawn_pos utils.Vec2) {
 	player.Pos = spawn_pos
 	player.I_Frames = 0
 	player.Health = 100
+	player.Won = false
+	player.Charged = 0
 }
 
 func NewPlayer(pos utils.Vec2) (player PlayerStruct) {
@@ -196,6 +204,8 @@ func NewPlayer(pos utils.Vec2) (player PlayerStruct) {
 	player.Health = 100
 	player.Health_Bar_Img = ebiten.NewImage(250, 24)
 	player.Health_Bar_Img.Fill(color.RGBA{255, 50, 50, 255})
+
+	player.Won = false
 
 	return player
 }

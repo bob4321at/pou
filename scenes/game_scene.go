@@ -59,6 +59,11 @@ func (scene *GameScene) Update() {
 		Current_Scene_Id = 2
 	}
 
+	if scene.Player.Won {
+		scene.Reset()
+		Current_Scene_Id = 3
+	}
+
 	scene.Player.Update(&scene.Current_Level)
 
 	scene.Current_Level.Update()

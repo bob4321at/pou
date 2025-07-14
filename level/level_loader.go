@@ -35,6 +35,7 @@ type TriggerTileJson struct {
 
 type LevelJson struct {
 	Player_Spawn  utils.Vec2
+	End           utils.Vec2
 	Tiles         []TileJson
 	Enemies       []EnemySpawnerJson
 	BreakableTile []BreakableTileJson
@@ -94,6 +95,12 @@ func LoadLevel(level_name string) Level {
 	level.Tiles = temp_level_tiles
 	level.Player_Spawn = utils.Vec2{X: temp_level_json.Player_Spawn.X - 320, Y: temp_level_json.Player_Spawn.Y - 240}
 	level.Player_Loaded = false
+
+	level.End_Pos = temp_level_json.End
+	level.Sock_Img, _, err = ebitenutil.NewImageFromFile("./levels/" + level_name + "/sock.png")
+	if err != nil {
+		panic(err)
+	}
 
 	level.Enemy_Spawners = nil
 	for _, spawner := range temp_level_json.Enemies {

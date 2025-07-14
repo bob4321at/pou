@@ -23,9 +23,7 @@ func (scene *Death_Menu_scene) Draw(display *ebiten.Image) {
 
 func (scene *Death_Menu_scene) Update() {
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) {
-		// if utils.Collide(utils.Vec2{X: 2, Y: 10}, utils.Vec2{X: 19, Y: 8}, utils.Vec2{X: utils.Mouse_X / 10, Y: utils.Mouse_Y / 10}, utils.Vec2{X: 1, Y: 1}) {
 		Current_Scene_Id = 1
-		// }
 	}
 }
 

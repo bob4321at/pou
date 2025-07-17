@@ -2,7 +2,6 @@ package gun
 
 import (
 	"main/camera"
-	"main/level"
 	"main/shaders"
 	"main/utils"
 	"math"
@@ -21,7 +20,7 @@ type MechaBullet struct {
 	Remove   bool
 }
 
-func (bullet *MechaBullet) Update(level *level.Level) {
+func (bullet *MechaBullet) Update() {
 	bullet.Vel.X = math.Cos(utils.Deg2Rad(bullet.Rotation))
 	bullet.Vel.Y = math.Sin(utils.Deg2Rad(bullet.Rotation))
 
@@ -90,6 +89,7 @@ type MechaGun struct {
 
 	Rendering_Rot float64
 	Img           textures.RenderableTexture
+	Dropped_Img   textures.RenderableTexture
 }
 
 func (gun *MechaGun) Shoot(Charged int) {
@@ -104,7 +104,7 @@ func (gun *MechaGun) Shoot(Charged int) {
 	}
 }
 
-func (gun *MechaGun) Update(current_level *level.Level) {
+func (gun *MechaGun) Update() {
 	if gun.Cooldown >= 0 {
 		gun.Cooldown -= 0.1
 	}
@@ -118,9 +118,9 @@ func (gun *MechaGun) Update(current_level *level.Level) {
 	}
 
 	for bullet_index, bullet := range gun.Bullets {
-		bullet.Update(current_level)
-		for i := range current_level.Enemies {
-			enemy := current_level.Enemies[i]
+		bullet.Update()
+		for i := range Enemies_In_Level {
+			enemy := Enemies_In_Level[i]
 			if bullet.Collide(enemy.GetPosition(), enemy.GetSize()) {
 				enemy.Hit(bullet.GetDamage())
 			}
@@ -161,6 +161,10 @@ func (gun *MechaGun) GetImg() textures.RenderableTexture {
 	return gun.Img
 }
 
+func (gun *MechaGun) GetDroppedImg() textures.RenderableTexture {
+	return gun.Dropped_Img
+}
+
 func (gun *MechaGun) GetCharge() int {
 	return gun.Charge
 }
@@ -169,10 +173,11 @@ func (gun *MechaGun) CanShoot() bool {
 	return gun.Cooldown <= 0
 }
 
-func CreateMechaGun() *MechaGun {
+func CreateMechaGun() Gun {
 	gun := MechaGun{}
 
 	gun.Img = textures.NewTexture("./art/guns/mecha_gun/gun.png", shaders.Flash_Shader)
+	gun.Dropped_Img = textures.NewTexture("./art/guns/mecha_gun/dropped.png", "")
 	gun.Charge = 40
 
 	return &gun

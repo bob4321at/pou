@@ -33,6 +33,13 @@ type TriggerTileJson struct {
 	Signal int
 }
 
+type GunTileJson struct {
+	Pos           utils.Vec2
+	GunId         int
+	SendSignal    int
+	ReceiveSignal int
+}
+
 type LevelJson struct {
 	Player_Spawn  utils.Vec2
 	End           utils.Vec2
@@ -40,6 +47,7 @@ type LevelJson struct {
 	Enemies       []EnemySpawnerJson
 	BreakableTile []BreakableTileJson
 	TriggerTile   []TriggerTileJson
+	GunTiles      []GunTileJson
 }
 
 func LoadLevel(level_name string) Level {
@@ -117,12 +125,39 @@ func LoadLevel(level_name string) Level {
 		panic(err)
 	}
 	for _, breakable_tile := range temp_level_json.BreakableTile {
-		level.BreakableTile = append(level.BreakableTile, BreakableTile{breakable_tile.Pos, breakable_tile.Signal, false, breakable_tile_img})
+		level.BreakableTile = append(level.BreakableTile, BreakableTile{breakable_tile.Pos, Signal{breakable_tile.Signal, false}, breakable_tile_img})
 	}
 
 	level.TriggerTile = nil
 	for _, trigger_tile := range temp_level_json.TriggerTile {
-		level.TriggerTile = append(level.TriggerTile, TriggerTile{trigger_tile.Pos, trigger_tile.Signal, false})
+		level.TriggerTile = append(level.TriggerTile, TriggerTile{trigger_tile.Pos, Signal{trigger_tile.Signal, false}})
+	}
+
+	level.GunTiles = nil
+	for _, gun_tile := range temp_level_json.GunTiles {
+		level.GunTiles = append(level.GunTiles, GunTile{gun_tile.Pos, gun_tile.GunId, Signal{gun_tile.SendSignal, false}, Signal{gun_tile.ReceiveSignal, false}, false})
+	}
+
+	for i, spawner := range level.Enemy_Spawners {
+		if spawner.ReceiveSignal.Id == 0 {
+			level.Send_Signals = append(level.Send_Signals, &level.Enemy_Spawners[i].SendSignal)
+		} else {
+			level.Receive_Signals = append(level.Receive_Signals, &level.Enemy_Spawners[i].ReceiveSignal)
+			level.Send_Signals = append(level.Send_Signals, &level.Enemy_Spawners[i].SendSignal)
+		}
+	}
+
+	for i := range level.BreakableTile {
+		level.Receive_Signals = append(level.Receive_Signals, &level.BreakableTile[i].ReceiveSignal)
+	}
+
+	for i := range level.TriggerTile {
+		level.Send_Signals = append(level.Send_Signals, &level.TriggerTile[i].SendSignal)
+	}
+
+	for i := range level.GunTiles {
+		level.Send_Signals = append(level.Send_Signals, &level.GunTiles[i].SendSignal)
+		level.Receive_Signals = append(level.Receive_Signals, &level.GunTiles[i].ReceiveSignal)
 	}
 
 	return level

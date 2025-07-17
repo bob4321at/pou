@@ -131,7 +131,7 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 		tile := &current_level.TriggerTile[i]
 
 		if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42}, tile.Pos, utils.Vec2{X: 32, Y: 32}) {
-			tile.Active = true
+			tile.SendSignal.Active = true
 		}
 	}
 
@@ -145,7 +145,7 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 	player.Pos.X += player.Vel.X
 	player.Pos.Y += player.Vel.Y
 
-	player.Gun.Update(current_level)
+	player.Gun.Update()
 
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) && player.Gun.CanShoot() {
 		player.Charged += 1

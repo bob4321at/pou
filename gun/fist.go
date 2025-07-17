@@ -2,7 +2,6 @@ package gun
 
 import (
 	"main/camera"
-	"main/level"
 	"main/shaders"
 	"main/utils"
 	"math"
@@ -21,7 +20,7 @@ type FistBullet struct {
 	Remove   bool
 }
 
-func (bullet *FistBullet) Update(current_level *level.Level) {}
+func (bullet *FistBullet) Update() {}
 
 func (bullet *FistBullet) Draw(screen *ebiten.Image) {}
 
@@ -66,7 +65,7 @@ type FistAirBullet struct {
 	Remove   bool
 }
 
-func (bullet *FistAirBullet) Update(current_level *level.Level) {
+func (bullet *FistAirBullet) Update() {
 	bullet.Position.X += bullet.Vel.X * 5
 	bullet.Position.Y += bullet.Vel.Y * 5
 }
@@ -133,7 +132,7 @@ func (gun *FistGun) Shoot(Charged int) {
 	}
 }
 
-func (gun *FistGun) Update(current_level *level.Level) {
+func (gun *FistGun) Update() {
 	if gun.Cooldown >= 0 {
 		gun.Cooldown -= 0.1
 	}
@@ -147,9 +146,9 @@ func (gun *FistGun) Update(current_level *level.Level) {
 	}
 
 	for bullet_index, bullet := range gun.Bullets {
-		bullet.Update(current_level)
-		for i := range current_level.Enemies {
-			enemy := current_level.Enemies[i]
+		bullet.Update()
+		for i := range Enemies_In_Level {
+			enemy := Enemies_In_Level[i]
 			if bullet.Collide(enemy.GetPosition(), enemy.GetSize()) {
 				enemy.Hit(bullet.GetDamage())
 			}
@@ -190,6 +189,10 @@ func (gun *FistGun) GetImg() textures.RenderableTexture {
 	return gun.Img
 }
 
+func (gun *FistGun) GetDroppedImg() textures.RenderableTexture {
+	return gun.Img
+}
+
 func (gun *FistGun) GetCharge() int {
 	return gun.Charge
 }
@@ -198,7 +201,7 @@ func (gun *FistGun) CanShoot() bool {
 	return gun.Cooldown <= 0
 }
 
-func CreateFistGun() *FistGun {
+func CreateFistGun() Gun {
 	gun := FistGun{}
 
 	gun.Img = textures.NewTexture("./art/guns/handgun/gun.png", shaders.Flash_Shader)

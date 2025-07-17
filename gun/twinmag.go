@@ -2,7 +2,6 @@ package gun
 
 import (
 	"main/camera"
-	"main/level"
 	"main/shaders"
 	"main/utils"
 	"math"
@@ -21,7 +20,7 @@ type TwinMagBullet struct {
 	Remove   bool
 }
 
-func (bullet *TwinMagBullet) Update(current_level *level.Level) {
+func (bullet *TwinMagBullet) Update() {
 	bullet.Position.X += bullet.Vel.X * 5
 	bullet.Position.Y += bullet.Vel.Y * 5
 }
@@ -76,7 +75,7 @@ type BigTwinMagBullet struct {
 	Remove   bool
 }
 
-func (bullet *BigTwinMagBullet) Update(current_level *level.Level) {
+func (bullet *BigTwinMagBullet) Update() {
 	bullet.Position.X += bullet.Vel.X * 5
 	bullet.Position.Y += bullet.Vel.Y * 5
 }
@@ -130,6 +129,7 @@ type TwinMagGun struct {
 
 	Rendering_Rot float64
 	Img           textures.RenderableTexture
+	Dropped_Img   textures.RenderableTexture
 }
 
 func (gun *TwinMagGun) Shoot(Charged int) {
@@ -145,7 +145,7 @@ func (gun *TwinMagGun) Shoot(Charged int) {
 	}
 }
 
-func (gun *TwinMagGun) Update(current_level *level.Level) {
+func (gun *TwinMagGun) Update() {
 	if gun.Cooldown >= 0 {
 		gun.Cooldown -= 0.1
 	}
@@ -159,9 +159,9 @@ func (gun *TwinMagGun) Update(current_level *level.Level) {
 	}
 
 	for bullet_index, bullet := range gun.Bullets {
-		bullet.Update(current_level)
-		for i := range current_level.Enemies {
-			enemy := current_level.Enemies[i]
+		bullet.Update()
+		for i := range Enemies_In_Level {
+			enemy := Enemies_In_Level[i]
 			if bullet.Collide(enemy.GetPosition(), enemy.GetSize()) {
 				enemy.Hit(bullet.GetDamage())
 			}
@@ -202,6 +202,10 @@ func (gun *TwinMagGun) GetImg() textures.RenderableTexture {
 	return gun.Img
 }
 
+func (gun *TwinMagGun) GetDroppedImg() textures.RenderableTexture {
+	return gun.Dropped_Img
+}
+
 func (gun *TwinMagGun) GetCharge() int {
 	return gun.Charge
 }
@@ -210,10 +214,11 @@ func (gun *TwinMagGun) CanShoot() bool {
 	return gun.Cooldown <= 0
 }
 
-func CreateTwinMagGun() *TwinMagGun {
+func CreateTwinMagGun() Gun {
 	gun := TwinMagGun{}
 
 	gun.Img = textures.NewTexture("./art/guns/twinmag/gun.png", shaders.Flash_Shader)
+	gun.Dropped_Img = textures.NewTexture("./art/guns/twinmag/dropped.png", "")
 	gun.Charge = 30
 
 	return &gun

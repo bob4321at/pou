@@ -2,7 +2,6 @@ package gun
 
 import (
 	"main/camera"
-	"main/level"
 	"main/shaders"
 	"main/utils"
 	"math"
@@ -22,7 +21,7 @@ type ShotgunBullet struct {
 	Remove   bool
 }
 
-func (bullet *ShotgunBullet) Update(current_level *level.Level) {
+func (bullet *ShotgunBullet) Update() {
 	bullet.Position.X += bullet.Vel.X * 5
 	bullet.Position.Y += bullet.Vel.Y * 5
 }
@@ -76,6 +75,7 @@ type Shotgun struct {
 
 	Rendering_Rot float64
 	Img           textures.RenderableTexture
+	Dropped_Img   textures.RenderableTexture
 }
 
 func (gun *Shotgun) Shoot(Charged int) {
@@ -91,7 +91,7 @@ func (gun *Shotgun) Shoot(Charged int) {
 	}
 }
 
-func (gun *Shotgun) Update(current_level *level.Level) {
+func (gun *Shotgun) Update() {
 	if gun.Cooldown >= 0 {
 		gun.Cooldown -= 0.1
 	}
@@ -105,9 +105,9 @@ func (gun *Shotgun) Update(current_level *level.Level) {
 	}
 
 	for bullet_index, bullet := range gun.Bullets {
-		bullet.Update(current_level)
-		for i := range current_level.Enemies {
-			enemy := current_level.Enemies[i]
+		bullet.Update()
+		for i := range Enemies_In_Level {
+			enemy := Enemies_In_Level[i]
 			if bullet.Collide(enemy.GetPosition(), enemy.GetSize()) {
 				enemy.Hit(bullet.GetDamage())
 			}
@@ -148,6 +148,10 @@ func (gun *Shotgun) GetImg() textures.RenderableTexture {
 	return gun.Img
 }
 
+func (gun *Shotgun) GetDroppedImg() textures.RenderableTexture {
+	return gun.Dropped_Img
+}
+
 func (gun *Shotgun) GetCharge() int {
 	return gun.Charge
 }
@@ -156,10 +160,11 @@ func (gun *Shotgun) CanShoot() bool {
 	return gun.Cooldown <= 0
 }
 
-func CreateShotgun() *Shotgun {
+func CreateShotgun() Gun {
 	gun := Shotgun{}
 
 	gun.Img = textures.NewTexture("./art/guns/shotgun/gun.png", shaders.Flash_Shader)
+	gun.Dropped_Img = textures.NewTexture("./art/guns/shotgun/dropped.png", "")
 	gun.Charge = 30
 
 	return &gun

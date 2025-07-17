@@ -3,7 +3,6 @@ package gun
 import (
 	"main/camera"
 	"main/enemies"
-	"main/level"
 	"main/shaders"
 	"main/utils"
 	"math"
@@ -23,22 +22,22 @@ type BeeBullet struct {
 	Lifttime float64
 }
 
-func (bullet *BeeBullet) Update(current_level *level.Level) {
+func (bullet *BeeBullet) Update() {
 	bullet.Img.Update()
 
 	bullet.Vel.X = math.Cos(utils.Deg2Rad(bullet.Rotation))
 	bullet.Vel.Y = math.Sin(utils.Deg2Rad(bullet.Rotation))
 
-	if len(current_level.Enemies) != 0 {
+	if len(Enemies_In_Level) != 0 {
 		var closest_enemy enemies.Enemy
 		closest_enemy_distance := -1.0
 
-		closest_enemy = current_level.Enemies[0]
+		closest_enemy = Enemies_In_Level[0]
 		closest_enemy_distance = math.Abs(utils.GetDist(bullet.Position, closest_enemy.GetPosition()))
 
-		for ei, enemy := range current_level.Enemies {
+		for ei, enemy := range Enemies_In_Level {
 			if math.Abs(utils.GetDist(bullet.Position, enemy.GetPosition())) < closest_enemy_distance {
-				closest_enemy = current_level.Enemies[ei]
+				closest_enemy = Enemies_In_Level[ei]
 				closest_enemy_distance = math.Abs(utils.GetDist(bullet.Position, enemy.GetPosition()))
 			}
 		}
@@ -115,6 +114,7 @@ type BeeGun struct {
 
 	Rendering_Rot float64
 	Img           textures.RenderableTexture
+	Dropped_Img   textures.RenderableTexture
 }
 
 func (gun *BeeGun) Shoot(Charged int) {
@@ -131,7 +131,7 @@ func (gun *BeeGun) Shoot(Charged int) {
 	}
 }
 
-func (gun *BeeGun) Update(current_level *level.Level) {
+func (gun *BeeGun) Update() {
 	if gun.Cooldown >= 0 {
 		gun.Cooldown -= 0.1
 	}
@@ -145,9 +145,9 @@ func (gun *BeeGun) Update(current_level *level.Level) {
 	}
 
 	for bullet_index, bullet := range gun.Bullets {
-		bullet.Update(current_level)
-		for i := range current_level.Enemies {
-			enemy := current_level.Enemies[i]
+		bullet.Update()
+		for i := range Enemies_In_Level {
+			enemy := Enemies_In_Level[i]
 			if bullet.Collide(enemy.GetPosition(), enemy.GetSize()) {
 				enemy.Hit(bullet.GetDamage())
 			}
@@ -190,6 +190,10 @@ func (gun *BeeGun) GetImg() textures.RenderableTexture {
 	return gun.Img
 }
 
+func (gun *BeeGun) GetDroppedImg() textures.RenderableTexture {
+	return gun.Dropped_Img
+}
+
 func (gun *BeeGun) GetCharge() int {
 	return gun.Charge
 }
@@ -198,10 +202,11 @@ func (gun *BeeGun) CanShoot() bool {
 	return gun.Cooldown <= 0
 }
 
-func CreateBeeGun() *BeeGun {
+func CreateBeeGun() Gun {
 	gun := BeeGun{}
 
 	gun.Img = textures.NewTexture("./art/guns/beegun/gun.png", shaders.Flash_Shader)
+	gun.Dropped_Img = textures.NewTexture("./art/guns/beegun/dropped.png", "")
 	gun.Charge = 30
 
 	return &gun

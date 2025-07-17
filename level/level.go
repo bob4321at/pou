@@ -3,6 +3,7 @@ package level
 import (
 	"main/camera"
 	"main/enemies"
+	"main/gun"
 	"main/utils"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -19,17 +20,21 @@ type Signal struct {
 }
 
 type Level struct {
-	Tiles          []Tile
-	TileSet_Img    *ebiten.Image
-	TileSet        []*ebiten.Image
-	Player_Loaded  bool
-	Player_Spawn   utils.Vec2
-	End_Pos        utils.Vec2
-	Sock_Img       *ebiten.Image
-	Enemy_Spawners []EnemySpawner
-	BreakableTile  []BreakableTile
-	TriggerTile    []TriggerTile
-	Enemies        []enemies.Enemy
+	Tiles           []Tile
+	TileSet_Img     *ebiten.Image
+	TileSet         []*ebiten.Image
+	Player_Loaded   bool
+	Player_Spawn    utils.Vec2
+	End_Pos         utils.Vec2
+	Sock_Img        *ebiten.Image
+	Enemy_Spawners  []EnemySpawner
+	BreakableTile   []BreakableTile
+	TriggerTile     []TriggerTile
+	GunTiles        []GunTile
+	Send_Signals    []*Signal
+	Receive_Signals []*Signal
+	Enemies         []enemies.Enemy
+	Dropped_Guns    []gun.DroppedGunStruct
 }
 
 func (level *Level) Update() {
@@ -43,7 +48,7 @@ func (level *Level) Update() {
 	for i := range level.BreakableTile {
 		breakable_tile := &level.BreakableTile[i]
 		breakable_tile.Update(level)
-		if !breakable_tile.Active {
+		if !breakable_tile.ReceiveSignal.Active {
 			enemies.Breakable_Tile_Hitboxes = append(enemies.Breakable_Tile_Hitboxes, breakable_tile.Pos)
 		}
 	}
@@ -65,7 +70,18 @@ func (level *Level) Update() {
 		}
 	}
 
+	for i := range level.Dropped_Guns {
+		dropped_gun := &level.Dropped_Guns[i]
+		dropped_gun.Update()
+	}
+
+	for i := range level.GunTiles {
+		gun_spawner := &level.GunTiles[i]
+		gun_spawner.Update(level)
+	}
+
 	enemies.AllEnemies = level.Enemies
+	gun.Enemies_In_Level = level.Enemies
 }
 
 func (level *Level) Draw(screen *ebiten.Image) {
@@ -83,7 +99,7 @@ func (level *Level) Draw(screen *ebiten.Image) {
 	for _, breakable_tile := range level.BreakableTile {
 		op := ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(breakable_tile.Pos.X)+(camera.Camera.Pos.X), float64(breakable_tile.Pos.Y)+(camera.Camera.Pos.Y))
-		if !breakable_tile.Active {
+		if !breakable_tile.ReceiveSignal.Active {
 			screen.DrawImage(breakable_tile.Img, &op)
 		}
 	}
@@ -93,6 +109,10 @@ func (level *Level) Draw(screen *ebiten.Image) {
 		for _, enemy := range spawner.Responsible_For {
 			enemy.Draw(screen)
 		}
+	}
+
+	for _, dropped_gun := range level.Dropped_Guns {
+		dropped_gun.Draw(screen)
 	}
 }
 
@@ -107,7 +127,7 @@ func (level *Level) Reset() {
 	}
 
 	for i := range level.BreakableTile {
-		level.BreakableTile[i].Active = false
+		level.BreakableTile[i].ReceiveSignal.Active = false
 	}
 }
 
@@ -125,7 +145,7 @@ func (level *Level) CheckCollision(pos utils.Vec2, size utils.Vec2) (bool, utils
 	}
 
 	for _, breakable_tile := range level.BreakableTile {
-		if !breakable_tile.Active {
+		if !breakable_tile.ReceiveSignal.Active {
 			check := utils.Collide(pos, size, utils.Vec2{X: float64(breakable_tile.Pos.X), Y: float64(breakable_tile.Pos.Y)}, utils.Vec2{X: 32, Y: 32})
 
 			if check {

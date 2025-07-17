@@ -8,6 +8,7 @@ import (
 	"main/player"
 	"main/shaders"
 	"main/utils"
+	worldmap "main/world_map"
 	"strconv"
 
 	"github.com/bob4321at/textures"
@@ -34,14 +35,17 @@ func (scene *GameScene) Setup() {
 
 	scene.Screen = textures.NewTexture("./art/display.png", shaders.Test_Refraction_Shader)
 
-	scene.Current_Level = level.LoadLevel("test_real_level")
-
 	scene.Player = player.NewPlayer(utils.Vec2{X: 100, Y: 100})
 
 	scene.SetedUp = true
 }
 
 func (scene *GameScene) Update() {
+	if worldmap.Level_To_Load != nil {
+		scene.Current_Level = level.LoadLevel(*worldmap.Level_To_Load)
+		worldmap.Level_To_Load = nil
+	}
+
 	if ebiten.IsKeyPressed(ebiten.Key1) {
 		scene.Player.Gun = gun.CreateNerfGun()
 	} else if ebiten.IsKeyPressed(ebiten.Key2) {
@@ -54,14 +58,23 @@ func (scene *GameScene) Update() {
 		scene.Player.Gun = gun.CreateMechaGun()
 	}
 
+	for i := range scene.Current_Level.Dropped_Guns {
+		dropped_gun := &scene.Current_Level.Dropped_Guns[i]
+		if dropped_gun.Picked_Up {
+			scene.Player.Gun = dropped_gun.GiveFunc()
+			utils.RemoveArrayElement(i, &scene.Current_Level.Dropped_Guns)
+			break
+		}
+	}
+
 	if scene.Player.Health <= 0 {
 		scene.Reset()
-		Current_Scene_Id = 2
+		Current_Scene_Id = 3
 	}
 
 	if scene.Player.Won {
 		scene.Reset()
-		Current_Scene_Id = 3
+		Current_Scene_Id = 4
 	}
 
 	scene.Player.Update(&scene.Current_Level)
@@ -82,7 +95,9 @@ func (scene *GameScene) Draw(display *ebiten.Image) {
 
 	scene.Screen.Img.Fill(color.RGBA{0, 0, 0, 0})
 
-	scene.Current_Level.Draw(scene.Screen.Img)
+	if scene.Current_Level.Tiles != nil {
+		scene.Current_Level.Draw(scene.Screen.Img)
+	}
 
 	scene.Player.Draw(scene.Screen.Img)
 

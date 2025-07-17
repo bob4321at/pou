@@ -22,7 +22,7 @@ func (scene *Win_Menu_Scene) Draw(display *ebiten.Image) {
 
 func (scene *Win_Menu_Scene) Update() {
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) {
-		Current_Scene_Id = 0
+		Current_Scene_Id = 1
 	}
 }
 

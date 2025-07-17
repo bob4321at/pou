@@ -35,20 +35,28 @@ func (spawner *EnemySpawner) Update(level *Level) {
 			}
 		}
 	} else {
-		for _, spawner := range level.Enemy_Spawners {
-			if spawner.SendSignal.Id == spawner.ReceiveSignal.Id {
-				if spawner.SendSignal.Active {
+		for _, signal := range level.Send_Signals {
+			if signal.Id == spawner.ReceiveSignal.Id {
+				if signal.Active {
 					spawner.ReceiveSignal.Active = true
 				}
 			}
 		}
-		for _, trigger := range level.TriggerTile {
-			if trigger.Signal == spawner.ReceiveSignal.Id {
-				if trigger.Active {
-					spawner.ReceiveSignal.Active = true
-				}
-			}
-		}
+
+		// for _, spawner := range level.Enemy_Spawners {
+		// 	if spawner.SendSignal.Id == spawner.ReceiveSignal.Id {
+		// 		if spawner.SendSignal.Active {
+		// 			spawner.ReceiveSignal.Active = true
+		// 		}
+		// 	}
+		// }
+		// for _, trigger := range level.TriggerTile {
+		// 	if trigger.SendSignal.Id == spawner.ReceiveSignal.Id {
+		// 		if trigger.SendSignal.Active {
+		// 			spawner.ReceiveSignal.Active = true
+		// 		}
+		// 	}
+		// }
 
 		if spawner.ReceiveSignal.Active {
 			spawner.Spawn = true

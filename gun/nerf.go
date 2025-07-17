@@ -2,7 +2,6 @@ package gun
 
 import (
 	"main/camera"
-	"main/level"
 	"main/shaders"
 	"main/utils"
 	"math"
@@ -22,22 +21,14 @@ type NerfBullet struct {
 	Remove   bool
 }
 
-func (bullet *NerfBullet) Update(current_level *level.Level) {
+func (bullet *NerfBullet) Update() {
 	bullet.Vel.X = math.Cos(utils.Deg2Rad(bullet.Rotation))
 	bullet.Vel.Y = math.Sin(utils.Deg2Rad(bullet.Rotation))
 
 	bullet.Position.X += bullet.Vel.X * 5
 	bullet.Position.Y += bullet.Vel.Y * 5
 
-	if (bullet.Rotation+180)+1710 > 0 {
-		if bullet.Rotation+180+1710 < 150 {
-			bullet.Rotation += 1
-		}
-	} else if (bullet.Rotation+180)+1710 < 0 {
-		if bullet.Rotation+180+1710 > -150 {
-			bullet.Rotation -= 1
-		}
-	}
+	bullet.Rotation += 1.5 * bullet.Vel.X
 }
 
 func (bullet *NerfBullet) Draw(screen *ebiten.Image) {
@@ -89,6 +80,7 @@ type NerfGun struct {
 
 	Rendering_Rot float64
 	Img           textures.RenderableTexture
+	Dropped_Img   textures.RenderableTexture
 }
 
 func (gun *NerfGun) Shoot(Charged int) {
@@ -108,7 +100,7 @@ func (gun *NerfGun) Shoot(Charged int) {
 	}
 }
 
-func (gun *NerfGun) Update(current_level *level.Level) {
+func (gun *NerfGun) Update() {
 	if gun.Cooldown >= 0 {
 		gun.Cooldown -= 0.1
 	}
@@ -122,9 +114,9 @@ func (gun *NerfGun) Update(current_level *level.Level) {
 	}
 
 	for bullet_index, bullet := range gun.Bullets {
-		bullet.Update(current_level)
-		for i := range current_level.Enemies {
-			enemy := current_level.Enemies[i]
+		bullet.Update()
+		for i := range Enemies_In_Level {
+			enemy := Enemies_In_Level[i]
 			if bullet.Collide(enemy.GetPosition(), enemy.GetSize()) {
 				enemy.Hit(bullet.GetDamage())
 			}
@@ -165,6 +157,10 @@ func (gun *NerfGun) GetImg() textures.RenderableTexture {
 	return gun.Img
 }
 
+func (gun *NerfGun) GetDroppedImg() textures.RenderableTexture {
+	return gun.Dropped_Img
+}
+
 func (gun *NerfGun) GetCharge() int {
 	return gun.Charge
 }
@@ -173,10 +169,11 @@ func (gun *NerfGun) CanShoot() bool {
 	return gun.Cooldown <= 0
 }
 
-func CreateNerfGun() *NerfGun {
+func CreateNerfGun() Gun {
 	gun := NerfGun{}
 
 	gun.Img = textures.NewTexture("./art/guns/nerfgun/gun.png", shaders.Flash_Shader)
+	gun.Dropped_Img = textures.NewTexture("./art/guns/nerfgun/dropped.png", "")
 	gun.Charge = 20
 
 	return &gun

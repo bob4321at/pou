@@ -218,7 +218,7 @@ func CreateTwinMagGun() Gun {
 	gun := TwinMagGun{}
 
 	gun.Img = textures.NewTexture("./art/guns/twinmag/gun.png", shaders.Flash_Shader)
-	gun.Dropped_Img = textures.NewTexture("./art/guns/twinmag/dropped.png", "")
+	gun.Dropped_Img = textures.NewTexture("./art/guns/twinmag/dropped.png", shaders.Fill_Shader)
 	gun.Charge = 30
 
 	return &gun

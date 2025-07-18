@@ -135,7 +135,7 @@ func LoadLevel(level_name string) Level {
 
 	level.GunTiles = nil
 	for _, gun_tile := range temp_level_json.GunTiles {
-		level.GunTiles = append(level.GunTiles, GunTile{gun_tile.Pos, gun_tile.GunId, Signal{gun_tile.SendSignal, false}, Signal{gun_tile.ReceiveSignal, false}, false})
+		level.GunTiles = append(level.GunTiles, GunTile{gun_tile.Pos, gun_tile.GunId, Signal{gun_tile.SendSignal, false}, Signal{gun_tile.ReceiveSignal, false}, false, nil})
 	}
 
 	for i, spawner := range level.Enemy_Spawners {

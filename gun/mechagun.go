@@ -177,7 +177,7 @@ func CreateMechaGun() Gun {
 	gun := MechaGun{}
 
 	gun.Img = textures.NewTexture("./art/guns/mecha_gun/gun.png", shaders.Flash_Shader)
-	gun.Dropped_Img = textures.NewTexture("./art/guns/mecha_gun/dropped.png", "")
+	gun.Dropped_Img = textures.NewTexture("./art/guns/mecha_gun/dropped.png", shaders.Fill_Shader)
 	gun.Charge = 40
 
 	return &gun

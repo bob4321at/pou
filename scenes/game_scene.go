@@ -2,7 +2,6 @@ package scenes
 
 import (
 	"image/color"
-	"main/gun"
 	"main/level"
 	"main/music"
 	"main/player"
@@ -46,18 +45,6 @@ func (scene *GameScene) Update() {
 		worldmap.Level_To_Load = nil
 	}
 
-	if ebiten.IsKeyPressed(ebiten.Key1) {
-		scene.Player.Gun = gun.CreateNerfGun()
-	} else if ebiten.IsKeyPressed(ebiten.Key2) {
-		scene.Player.Gun = gun.CreateBeeGun()
-	} else if ebiten.IsKeyPressed(ebiten.Key3) {
-		scene.Player.Gun = gun.CreateTwinMagGun()
-	} else if ebiten.IsKeyPressed(ebiten.Key4) {
-		scene.Player.Gun = gun.CreateShotgun()
-	} else if ebiten.IsKeyPressed(ebiten.Key5) {
-		scene.Player.Gun = gun.CreateMechaGun()
-	}
-
 	for i := range scene.Current_Level.Dropped_Guns {
 		dropped_gun := &scene.Current_Level.Dropped_Guns[i]
 		if dropped_gun.Picked_Up {
@@ -95,11 +82,11 @@ func (scene *GameScene) Draw(display *ebiten.Image) {
 
 	scene.Screen.Img.Fill(color.RGBA{0, 0, 0, 0})
 
+	scene.Player.Draw(scene.Screen.Img)
+
 	if scene.Current_Level.Tiles != nil {
 		scene.Current_Level.Draw(scene.Screen.Img)
 	}
-
-	scene.Player.Draw(scene.Screen.Img)
 
 	scene.Screen.Draw(display, &ebiten.DrawImageOptions{})
 

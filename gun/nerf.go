@@ -173,7 +173,7 @@ func CreateNerfGun() Gun {
 	gun := NerfGun{}
 
 	gun.Img = textures.NewTexture("./art/guns/nerfgun/gun.png", shaders.Flash_Shader)
-	gun.Dropped_Img = textures.NewTexture("./art/guns/nerfgun/dropped.png", "")
+	gun.Dropped_Img = textures.NewTexture("./art/guns/nerfgun/dropped.png", shaders.Fill_Shader)
 	gun.Charge = 20
 
 	return &gun

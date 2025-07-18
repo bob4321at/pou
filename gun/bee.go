@@ -206,7 +206,7 @@ func CreateBeeGun() Gun {
 	gun := BeeGun{}
 
 	gun.Img = textures.NewTexture("./art/guns/beegun/gun.png", shaders.Flash_Shader)
-	gun.Dropped_Img = textures.NewTexture("./art/guns/beegun/dropped.png", "")
+	gun.Dropped_Img = textures.NewTexture("./art/guns/beegun/dropped.png", shaders.Fill_Shader)
 	gun.Charge = 30
 
 	return &gun

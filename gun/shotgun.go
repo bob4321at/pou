@@ -164,7 +164,7 @@ func CreateShotgun() Gun {
 	gun := Shotgun{}
 
 	gun.Img = textures.NewTexture("./art/guns/shotgun/gun.png", shaders.Flash_Shader)
-	gun.Dropped_Img = textures.NewTexture("./art/guns/shotgun/dropped.png", "")
+	gun.Dropped_Img = textures.NewTexture("./art/guns/shotgun/dropped.png", shaders.Fill_Shader)
 	gun.Charge = 30
 
 	return &gun

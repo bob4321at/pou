@@ -106,7 +106,7 @@ func NewWorldMap() WorldMapStruct {
 	world_map.Points = append(world_map.Points, NewLevelPoint("tutorial", utils.Vec2{X: 71, Y: 39}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("test_real_level", utils.Vec2{X: 294, Y: 44}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("signal_test", utils.Vec2{X: 597, Y: 54}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 615, Y: 187}))
+	world_map.Points = append(world_map.Points, NewLevelPoint("gun_send_test", utils.Vec2{X: 615, Y: 187}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 511, Y: 228}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 483, Y: 141}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 152, Y: 119}))

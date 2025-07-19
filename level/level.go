@@ -31,6 +31,7 @@ type Level struct {
 	BreakableTile   []BreakableTile
 	TriggerTile     []TriggerTile
 	GunTiles        []GunTile
+	SpikeTiles      []SpikeTile
 	Send_Signals    []*Signal
 	Receive_Signals []*Signal
 	Enemies         []enemies.Enemy
@@ -104,6 +105,12 @@ func (level *Level) Draw(screen *ebiten.Image) {
 		}
 	}
 
+	for _, spike_tile := range level.SpikeTiles {
+		op := ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(spike_tile.Pos.X)+(camera.Camera.Pos.X), float64(spike_tile.Pos.Y)+(camera.Camera.Pos.Y))
+		screen.DrawImage(spike_tile.Img, &op)
+	}
+
 	for i := range level.Enemy_Spawners {
 		spawner := &level.Enemy_Spawners[i]
 		for _, enemy := range spawner.Responsible_For {
@@ -152,6 +159,15 @@ func (level *Level) CheckCollision(pos utils.Vec2, size utils.Vec2) (bool, utils
 				hit = true
 				tile_pos = utils.Vec2{X: float64(breakable_tile.Pos.X), Y: float64(breakable_tile.Pos.Y)}
 			}
+		}
+	}
+
+	for _, spike_tile := range level.SpikeTiles {
+		check := utils.Collide(pos, size, utils.Vec2{X: float64(spike_tile.Pos.X + 8), Y: float64(spike_tile.Pos.Y + 8)}, utils.Vec2{X: 16, Y: 16})
+
+		if check {
+			hit = true
+			tile_pos = utils.Vec2{X: float64(spike_tile.Pos.X), Y: float64(spike_tile.Pos.Y)}
 		}
 	}
 

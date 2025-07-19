@@ -40,6 +40,11 @@ type GunTileJson struct {
 	ReceiveSignal int
 }
 
+type SpikeTileJson struct {
+	Pos       utils.Vec2
+	Direction int
+}
+
 type LevelJson struct {
 	Player_Spawn  utils.Vec2
 	End           utils.Vec2
@@ -48,6 +53,7 @@ type LevelJson struct {
 	BreakableTile []BreakableTileJson
 	TriggerTile   []TriggerTileJson
 	GunTiles      []GunTileJson
+	SpikeTiles    []SpikeTileJson
 }
 
 func LoadLevel(level_name string) Level {
@@ -136,6 +142,36 @@ func LoadLevel(level_name string) Level {
 	level.GunTiles = nil
 	for _, gun_tile := range temp_level_json.GunTiles {
 		level.GunTiles = append(level.GunTiles, GunTile{gun_tile.Pos, gun_tile.GunId, Signal{gun_tile.SendSignal, false}, Signal{gun_tile.ReceiveSignal, false}, false, nil})
+	}
+
+	level.SpikeTiles = nil
+
+	imga, _, err := ebitenutil.NewImageFromFile("./levels/" + level_name + "/spikeup.png")
+	if err != nil {
+		panic(err)
+	}
+	imgb, _, err := ebitenutil.NewImageFromFile("./levels/" + level_name + "/spikeright.png")
+	if err != nil {
+		panic(err)
+	}
+	imgc, _, err := ebitenutil.NewImageFromFile("./levels/" + level_name + "/spikedown.png")
+	if err != nil {
+		panic(err)
+	}
+	imgd, _, err := ebitenutil.NewImageFromFile("./levels/" + level_name + "/spikeleft.png")
+	if err != nil {
+		panic(err)
+	}
+
+	spike_images := []*ebiten.Image{
+		imga,
+		imgb,
+		imgc,
+		imgd,
+	}
+
+	for _, spike_tile := range temp_level_json.SpikeTiles {
+		level.SpikeTiles = append(level.SpikeTiles, SpikeTile{spike_tile.Pos, spike_images[spike_tile.Direction]})
 	}
 
 	for i, spawner := range level.Enemy_Spawners {

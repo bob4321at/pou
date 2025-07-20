@@ -90,7 +90,7 @@ func (turret *Turret) GetWallDist(dir utils.Vec2) (float64, utils.Vec2) {
 func NewTurret(pos utils.Vec2) Enemy {
 	turret := Turret{}
 	turret.Pos = pos
-	turret.Health = 10
+	turret.Health = 30
 
 	go func() {
 		wall_right_dist, wall_right_pos := turret.GetWallDist(utils.Vec2{X: 16, Y: 0})

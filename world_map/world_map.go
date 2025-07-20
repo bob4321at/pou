@@ -55,6 +55,17 @@ func (world_map *WorldMapStruct) Update() {
 		world_map.World_Map_Player_Reached = false
 	}
 
+	if !world_map.World_Map_Player_Reached {
+		angle := utils.Deg2Rad(utils.Rad2Deg(utils.GetAngle(world_map.World_Map_Player_Pos, world_map.Points[world_map.World_Map_Player_Index].GetPos())) + 90)
+		world_map.World_Map_Player_Pos.X += math.Cos(angle) * 4
+		world_map.World_Map_Player_Pos.Y -= math.Sin(angle) * 4
+	}
+
+	if utils.GetDist(world_map.World_Map_Player_Pos, world_map.Points[world_map.World_Map_Player_Index].GetPos()) < 4 {
+		world_map.World_Map_Player_Reached = true
+		world_map.World_Map_Player_Index_Prev = world_map.World_Map_Player_Index
+	}
+
 	world_map.World_Map_Player.Update()
 }
 
@@ -66,21 +77,10 @@ func (world_map *WorldMapStruct) Draw(screen *ebiten.Image) {
 		point.Draw(screen)
 	}
 
-	if !world_map.World_Map_Player_Reached {
-		angle := utils.Deg2Rad(utils.Rad2Deg(utils.GetAngle(world_map.World_Map_Player_Pos, world_map.Points[world_map.World_Map_Player_Index].GetPos())) + 90)
-		world_map.World_Map_Player_Pos.X += math.Cos(angle)
-		world_map.World_Map_Player_Pos.Y -= math.Sin(angle)
-	}
-
 	if world_map.World_Map_Player_Pos.X > world_map.Points[world_map.World_Map_Player_Index].GetPos().X {
 		world_map.World_Map_Player_Dir = true
 	} else {
 		world_map.World_Map_Player_Dir = false
-	}
-
-	if utils.GetDist(world_map.World_Map_Player_Pos, world_map.Points[world_map.World_Map_Player_Index].GetPos()) < 1 {
-		world_map.World_Map_Player_Reached = true
-		world_map.World_Map_Player_Index_Prev = world_map.World_Map_Player_Index
 	}
 
 	if !world_map.World_Map_Player_Dir {
@@ -105,7 +105,7 @@ func NewWorldMap() WorldMapStruct {
 
 	world_map.Points = append(world_map.Points, NewLevelPoint("tutorial", utils.Vec2{X: 71, Y: 39}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("test_real_level", utils.Vec2{X: 294, Y: 44}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("signal_test", utils.Vec2{X: 597, Y: 54}))
+	world_map.Points = append(world_map.Points, NewLevelPoint("plateform", utils.Vec2{X: 597, Y: 54}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("gun_send_test", utils.Vec2{X: 615, Y: 187}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 511, Y: 228}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 483, Y: 141}))

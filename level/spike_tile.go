@@ -7,6 +7,7 @@ import (
 )
 
 type SpikeTile struct {
-	Pos utils.Vec2
-	Img *ebiten.Image
+	Pos    utils.Vec2
+	Damage int
+	Img    *ebiten.Image
 }

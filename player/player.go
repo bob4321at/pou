@@ -52,11 +52,11 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 			}
 		}
 
-		for i := range current_level.SpikeTiles {
+		for i, spike := range current_level.SpikeTiles {
 			tile := &current_level.SpikeTiles[i]
 
 			if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42}, tile.Pos, utils.Vec2{X: 32, Y: 32}) {
-				player.Health -= 1
+				player.Health -= spike.Damage
 			}
 		}
 	}

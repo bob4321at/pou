@@ -42,6 +42,7 @@ type GunTileJson struct {
 
 type SpikeTileJson struct {
 	Pos       utils.Vec2
+	Damage    int
 	Direction int
 }
 
@@ -171,7 +172,7 @@ func LoadLevel(level_name string) Level {
 	}
 
 	for _, spike_tile := range temp_level_json.SpikeTiles {
-		level.SpikeTiles = append(level.SpikeTiles, SpikeTile{spike_tile.Pos, spike_images[spike_tile.Direction]})
+		level.SpikeTiles = append(level.SpikeTiles, SpikeTile{spike_tile.Pos, spike_tile.Damage, spike_images[spike_tile.Direction]})
 	}
 
 	for i, spawner := range level.Enemy_Spawners {

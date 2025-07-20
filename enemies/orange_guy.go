@@ -58,12 +58,12 @@ func (orange_guy *OrangeGuy) Update() {
 		}
 	}
 
-	y_collision, _ := CheckLevelCollision(utils.Vec2{X: orange_guy.Pos.X, Y: orange_guy.Pos.Y + orange_guy.Vel.Y}, utils.Vec2{X: 48, Y: 64})
+	y_collision, _ := CheckLevelCollision(utils.Vec2{X: orange_guy.Pos.X, Y: orange_guy.Pos.Y + 4 + orange_guy.Vel.Y}, utils.Vec2{X: 48, Y: 60})
 	if y_collision {
 		orange_guy.Vel.Y = 0
 	}
 
-	x_collision, _ := CheckLevelCollision(utils.Vec2{X: orange_guy.Pos.X + orange_guy.Vel.X, Y: orange_guy.Pos.Y}, utils.Vec2{X: 48, Y: 64})
+	x_collision, _ := CheckLevelCollision(utils.Vec2{X: orange_guy.Pos.X + orange_guy.Vel.X, Y: orange_guy.Pos.Y + 4}, utils.Vec2{X: 48, Y: 60})
 	if x_collision {
 		orange_guy.Vel.X = 0
 	}

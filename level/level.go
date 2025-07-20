@@ -41,6 +41,12 @@ type Level struct {
 func (level *Level) Update() {
 	enemies.Breakable_Tile_Hitboxes = nil
 
+	for _, enemy := range enemies.Enemies_To_Add {
+		level.Enemy_Spawners[0].Responsible_For = append(level.Enemy_Spawners[0].Responsible_For, enemy)
+	}
+
+	enemies.Enemies_To_Add = nil
+
 	for i := range level.Enemy_Spawners {
 		spawner := &level.Enemy_Spawners[i]
 		spawner.Update(level)

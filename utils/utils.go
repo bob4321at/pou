@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -19,6 +20,32 @@ func Collide(pos1, size1, pos2, size2 Vec2) bool {
 		}
 	}
 	return false
+}
+
+func BubbleSort(array []*float64) []*float64 {
+	for i := 0; i < len(array)-1; i++ {
+		for j := 0; j < len(array)-i-1; j++ {
+			if *array[j] > *array[j+1] {
+				array[j], array[j+1] = array[j+1], array[j]
+			}
+		}
+	}
+	return array
+}
+
+func Raycast(pos, dir Vec2, length int, hitbox_pos, hitbox_size Vec2) (Vec2, bool) {
+	for l := range length {
+		offx := dir.X * float64(l)
+		offy := dir.Y * float64(l)
+
+		fmt.Println(offx)
+
+		if Collide(Vec2{float64(int(pos.X + offx)), float64(int(pos.Y + offy))}, Vec2{1, 1}, hitbox_pos, hitbox_size) {
+			return Vec2{float64(int(pos.X + offx)), float64(int(pos.Y + offy))}, true
+		}
+	}
+
+	return Vec2{0, 0}, false
 }
 
 func Deg2Rad(num float64) float64 {

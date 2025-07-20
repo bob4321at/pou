@@ -23,6 +23,7 @@ var EnemySpawnFuncs = map[int]func(pos utils.Vec2) Enemy{
 	4: NewDummy,
 	5: NewRedGhost,
 	6: NewRedGuy,
+	7: NewTurret,
 }
 
 var Level_Hitbox []utils.Vec2
@@ -31,6 +32,8 @@ var AllEnemies []Enemy
 
 var Player_Pos *utils.Vec2
 var Player_Health *int
+
+var Enemies_To_Add []Enemy
 
 func CheckLevelCollision(pos utils.Vec2, size utils.Vec2) (bool, utils.Vec2) {
 	hit := false

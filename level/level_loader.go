@@ -118,6 +118,9 @@ func LoadLevel(level_name string) Level {
 	}
 
 	level.Enemy_Spawners = nil
+
+	level.Enemy_Spawners = append(level.Enemy_Spawners, EnemySpawner{utils.Vec2{X: 0, Y: 0}, []int{}, nil, 10, 0, Signal{0, false}, Signal{0, false}, true})
+
 	for _, spawner := range temp_level_json.Enemies {
 		if spawner.ReceiveSignal == 0 {
 			level.Enemy_Spawners = append(level.Enemy_Spawners, EnemySpawner{spawner.Pos, spawner.Enemies, nil, 10, 0, Signal{spawner.SendSignal, false}, Signal{spawner.ReceiveSignal, false}, true})

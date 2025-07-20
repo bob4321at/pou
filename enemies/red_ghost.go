@@ -70,8 +70,8 @@ func (red_ghost *RedGhost) Update() {
 
 		angle := utils.GetAngle(utils.Vec2{X: Player_Pos.X + 320, Y: Player_Pos.Y + 180}, red_ghost.Pos)
 
-		red_ghost.Vel.X = -math.Cos(angle+90) * 10
-		red_ghost.Vel.Y = math.Sin(angle+90) * 10
+		red_ghost.Vel.X = math.Cos(angle-utils.Deg2Rad(90)) * 10
+		red_ghost.Vel.Y = -math.Sin(angle-utils.Deg2Rad(90)) * 10
 	}
 
 	red_ghost_enemy := Enemy(red_ghost)

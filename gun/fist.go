@@ -44,7 +44,7 @@ func (bullet *FistBullet) CheckRemoval() bool {
 func CreateFistBullet(pos, vel utils.Vec2, rotation float64) *FistBullet {
 	bullet := FistBullet{}
 
-	bullet.Damage = 5
+	bullet.Damage = 3
 
 	bullet.Position = pos
 	bullet.Vel = vel
@@ -99,7 +99,7 @@ func (bullet *FistAirBullet) CheckRemoval() bool {
 func CreateFistAirBullet(pos, vel utils.Vec2, rotation float64) *FistAirBullet {
 	bullet := FistAirBullet{}
 
-	bullet.Damage = 3
+	bullet.Damage = 2
 
 	bullet.Position = pos
 	bullet.Vel = vel

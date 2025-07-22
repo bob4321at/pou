@@ -24,6 +24,8 @@ var EnemySpawnFuncs = map[int]func(pos utils.Vec2) Enemy{
 	5: NewRedGhost,
 	6: NewRedGuy,
 	7: NewTurret,
+	8: NewBlueGuy,
+	9: NewGreenGuy,
 }
 
 var Level_Hitbox []utils.Vec2

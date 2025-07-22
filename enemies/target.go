@@ -63,7 +63,7 @@ func NewTarget(pos utils.Vec2) Enemy {
 	target.Pos = pos
 	target.Health = 10
 
-	target.Img = textures.NewTexture("./art/target.png", shaders.Flash_Shader)
+	target.Img = textures.NewTexture("./art/enemies/target.png", shaders.Flash_Shader)
 
 	return &target
 }

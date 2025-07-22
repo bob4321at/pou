@@ -1,16 +1,18 @@
 package level
 
 import (
+	"image/color"
 	"main/camera"
 	"main/enemies"
 	"main/gun"
 	"main/utils"
 
+	"github.com/bob4321at/textures"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Tile struct {
-	Img *ebiten.Image
+	Img textures.Texture
 	Pos utils.Vec2
 }
 
@@ -36,6 +38,10 @@ type Level struct {
 	Receive_Signals []*Signal
 	Enemies         []enemies.Enemy
 	Dropped_Guns    []gun.DroppedGunStruct
+
+	TileBorderColor color.RGBA
+	TileColor       color.RGBA
+	BackgroundColor color.RGBA
 }
 
 func (level *Level) Update() {
@@ -100,14 +106,34 @@ func (level *Level) Draw(screen *ebiten.Image) {
 		op := ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(tile.Pos.X)+(camera.Camera.Pos.X), float64(tile.Pos.Y)+(camera.Camera.Pos.Y))
 
-		screen.DrawImage(tile.Img, &op)
+		tile.Img.SetUniforms(map[string]any{
+			"R": float64(level.TileBorderColor.R) / 255,
+			"G": float64(level.TileBorderColor.G) / 255,
+			"B": float64(level.TileBorderColor.B) / 255,
+
+			"RR": float64(level.TileColor.R) / 255,
+			"GG": float64(level.TileColor.G) / 255,
+			"BB": float64(level.TileColor.B) / 255,
+		})
+
+		tile.Img.Draw(screen, &op)
 	}
 
 	for _, breakable_tile := range level.BreakableTile {
 		op := ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(breakable_tile.Pos.X)+(camera.Camera.Pos.X), float64(breakable_tile.Pos.Y)+(camera.Camera.Pos.Y))
 		if !breakable_tile.ReceiveSignal.Active {
-			screen.DrawImage(breakable_tile.Img, &op)
+			breakable_tile.Img.SetUniforms(map[string]any{
+				"R": float64(level.TileBorderColor.R) / 255,
+				"G": float64(level.TileBorderColor.G) / 255,
+				"B": float64(level.TileBorderColor.B) / 255,
+
+				"RR": float64(level.TileColor.R) / 255,
+				"GG": float64(level.TileColor.G) / 255,
+				"BB": float64(level.TileColor.B) / 255,
+			})
+
+			breakable_tile.Img.Draw(screen, &op)
 		}
 	}
 

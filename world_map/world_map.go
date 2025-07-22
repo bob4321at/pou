@@ -105,14 +105,14 @@ func NewWorldMap() WorldMapStruct {
 
 	world_map.Points = append(world_map.Points, NewLevelPoint("tutorial", utils.Vec2{X: 71, Y: 39}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("test_real_level", utils.Vec2{X: 294, Y: 44}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("plateform", utils.Vec2{X: 597, Y: 54}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("gun_send_test", utils.Vec2{X: 615, Y: 187}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 511, Y: 228}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 483, Y: 141}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 152, Y: 119}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 56, Y: 204}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 108, Y: 303}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 607, Y: 321}))
+	world_map.Points = append(world_map.Points, NewLevelPoint("arson", utils.Vec2{X: 597, Y: 54}))
+	world_map.Points = append(world_map.Points, NewLevelPoint("red_jumping", utils.Vec2{X: 615, Y: 187}))
+	world_map.Points = append(world_map.Points, NewLevelPoint("hard", utils.Vec2{X: 511, Y: 228}))
+	world_map.Points = append(world_map.Points, NewLevelPoint("arena", utils.Vec2{X: 483, Y: 141}))
+	world_map.Points = append(world_map.Points, NewLevelPoint("plateform", utils.Vec2{X: 152, Y: 119}))
+	world_map.Points = append(world_map.Points, NewLevelPoint("spikes", utils.Vec2{X: 56, Y: 204}))
+	world_map.Points = append(world_map.Points, NewLevelPoint("deathrun", utils.Vec2{X: 108, Y: 303}))
+	world_map.Points = append(world_map.Points, NewLevelPoint("turret", utils.Vec2{X: 607, Y: 321}))
 
 	return world_map
 }

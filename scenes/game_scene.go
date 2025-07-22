@@ -16,7 +16,6 @@ import (
 )
 
 type GameScene struct {
-	Shoot_Now_Ui  *ebiten.Image
 	SetedUp       bool
 	Music         music.MusicStruct
 	Player        player.PlayerStruct
@@ -26,7 +25,6 @@ type GameScene struct {
 
 func (scene *GameScene) Setup() {
 	var err error
-	scene.Shoot_Now_Ui, _, err = ebitenutil.NewImageFromFile("./art/shoot_now_ui.png")
 	if err != nil {
 		panic(err)
 	}
@@ -78,7 +76,7 @@ func (scene *GameScene) Reset() {
 }
 
 func (scene *GameScene) Draw(display *ebiten.Image) {
-	display.Fill(color.RGBA{255, 217, 217, 255})
+	display.Fill(scene.Current_Level.BackgroundColor)
 
 	scene.Screen.Img.Fill(color.RGBA{0, 0, 0, 0})
 

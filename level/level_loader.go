@@ -2,11 +2,13 @@ package level
 
 import (
 	"encoding/json"
-	"image"
+	"image/color"
 	"main/enemies"
+	"main/shaders"
 	"main/utils"
 	"os"
 
+	"github.com/bob4321at/textures"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
@@ -55,39 +57,40 @@ type LevelJson struct {
 	TriggerTile   []TriggerTileJson
 	GunTiles      []GunTileJson
 	SpikeTiles    []SpikeTileJson
+
+	TileBorderColor color.RGBA
+	TileColor       color.RGBA
+	BackgroundColor color.RGBA
+}
+
+var TileSet []textures.Texture
+
+func init() {
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/top_left.png", shaders.Chunk_Shader))
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/top_center.png", shaders.Chunk_Shader))
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/top_right.png", shaders.Chunk_Shader))
+
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/middle_left.png", shaders.Chunk_Shader))
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/middle_center.png", shaders.Chunk_Shader))
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/middle_right.png", shaders.Chunk_Shader))
+
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/bottom_left.png", shaders.Chunk_Shader))
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/bottom_center.png", shaders.Chunk_Shader))
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/bottom_right.png", shaders.Chunk_Shader))
+
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/vertical_top.png", shaders.Chunk_Shader))
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/vertical_middle.png", shaders.Chunk_Shader))
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/vertical_bottom.png", shaders.Chunk_Shader))
+
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/horizontal_left.png", shaders.Chunk_Shader))
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/horizontal_center.png", shaders.Chunk_Shader))
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/horizontal_right.png", shaders.Chunk_Shader))
+
+	TileSet = append(TileSet, *textures.NewTexture("./art/tileset/center.png", shaders.Chunk_Shader))
 }
 
 func LoadLevel(level_name string) Level {
 	level := Level{}
-
-	temp_img, _, err := ebitenutil.NewImageFromFile("./levels/" + level_name + "/tileset.png")
-	if err != nil {
-		panic(err)
-	}
-
-	level.TileSet_Img = temp_img
-
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(0, 0, 32, 32))))
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(32, 0, 64, 32))))
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(64, 0, 96, 32))))
-
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(0, 32, 32, 64))))
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(32, 32, 64, 64))))
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(64, 32, 96, 64))))
-
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(0, 64, 32, 96))))
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(32, 64, 64, 96))))
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(64, 64, 96, 96))))
-
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(96, 0, 128, 32))))
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(96, 32, 128, 64))))
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(96, 64, 128, 96))))
-
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(0, 96, 32, 128))))
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(32, 96, 64, 128))))
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(64, 96, 96, 128))))
-
-	level.TileSet = append(level.TileSet, ebiten.NewImageFromImage(level.TileSet_Img.SubImage(image.Rect(96, 96, 128, 128))))
 
 	level_file, err := os.ReadFile("./levels/" + level_name + "/level")
 	if err != nil {
@@ -103,7 +106,7 @@ func LoadLevel(level_name string) Level {
 	temp_level_tiles := []Tile{}
 
 	for _, tile := range temp_level_json.Tiles {
-		temp_level_tiles = append(temp_level_tiles, Tile{level.TileSet[tile.ID-1], tile.Pos})
+		temp_level_tiles = append(temp_level_tiles, Tile{TileSet[tile.ID-1], tile.Pos})
 		enemies.Level_Hitbox = append(enemies.Level_Hitbox, tile.Pos)
 	}
 
@@ -129,11 +132,7 @@ func LoadLevel(level_name string) Level {
 		}
 	}
 
-	level.BreakableTile = nil
-	breakable_tile_img, _, err := ebitenutil.NewImageFromFile("./levels/" + level_name + "/breakable_tile.png")
-	if err != nil {
-		panic(err)
-	}
+	breakable_tile_img := textures.NewTexture("./art/tileset/breakable_tile.png", shaders.Chunk_Shader)
 	for _, breakable_tile := range temp_level_json.BreakableTile {
 		level.BreakableTile = append(level.BreakableTile, BreakableTile{breakable_tile.Pos, Signal{breakable_tile.Signal, false}, breakable_tile_img})
 	}
@@ -199,6 +198,10 @@ func LoadLevel(level_name string) Level {
 		level.Send_Signals = append(level.Send_Signals, &level.GunTiles[i].SendSignal)
 		level.Receive_Signals = append(level.Receive_Signals, &level.GunTiles[i].ReceiveSignal)
 	}
+
+	level.TileBorderColor = temp_level_json.TileBorderColor
+	level.TileColor = temp_level_json.TileColor
+	level.BackgroundColor = temp_level_json.BackgroundColor
 
 	return level
 }

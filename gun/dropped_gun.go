@@ -44,6 +44,8 @@ func (dropped_gun *DroppedGunStruct) Update() {
 
 	collide_y, _ := enemies.CheckLevelCollision(utils.Vec2{X: dropped_gun.Pos.X, Y: dropped_gun.Pos.Y + dropped_gun.Vel.Y}, utils.Vec2{X: float64(dropped_gun.Img.GetTexture().Bounds().Dx()), Y: float64(dropped_gun.Img.GetTexture().Bounds().Dy())})
 
+	// collide_y = false
+
 	if collide_y {
 		dropped_gun.Vel.Y = 0
 	}

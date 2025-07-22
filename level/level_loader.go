@@ -105,6 +105,7 @@ func LoadLevel(level_name string) Level {
 
 	temp_level_tiles := []Tile{}
 
+	enemies.Level_Hitbox = nil
 	for _, tile := range temp_level_json.Tiles {
 		temp_level_tiles = append(temp_level_tiles, Tile{TileSet[tile.ID-1], tile.Pos})
 		enemies.Level_Hitbox = append(enemies.Level_Hitbox, tile.Pos)

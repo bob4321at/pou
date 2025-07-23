@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -37,8 +36,6 @@ func Raycast(pos, dir Vec2, length int, hitbox_pos, hitbox_size Vec2) (Vec2, boo
 	for l := range length {
 		offx := dir.X * float64(l)
 		offy := dir.Y * float64(l)
-
-		fmt.Println(offx)
 
 		if Collide(Vec2{float64(int(pos.X + offx)), float64(int(pos.Y + offy))}, Vec2{1, 1}, hitbox_pos, hitbox_size) {
 			return Vec2{float64(int(pos.X + offx)), float64(int(pos.Y + offy))}, true

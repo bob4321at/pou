@@ -31,8 +31,10 @@ type BreakableTileJson struct {
 }
 
 type TriggerTileJson struct {
-	Pos    utils.Vec2
-	Signal int
+	Pos       utils.Vec2
+	Signal    int
+	Visible   bool
+	Direction int
 }
 
 type GunTileJson struct {
@@ -48,6 +50,12 @@ type SpikeTileJson struct {
 	Direction int
 }
 
+type SpringTileJson struct {
+	Pos       utils.Vec2
+	Power     int
+	Direction int
+}
+
 type LevelJson struct {
 	Player_Spawn  utils.Vec2
 	End           utils.Vec2
@@ -57,6 +65,7 @@ type LevelJson struct {
 	TriggerTile   []TriggerTileJson
 	GunTiles      []GunTileJson
 	SpikeTiles    []SpikeTileJson
+	SpringTiles   []SpringTileJson
 
 	TileBorderColor color.RGBA
 	TileColor       color.RGBA
@@ -133,14 +142,38 @@ func LoadLevel(level_name string) Level {
 		}
 	}
 
-	breakable_tile_img := textures.NewTexture("./art/tileset/breakable_tile.png", shaders.Chunk_Shader)
+	breakable_tile_img := textures.NewTexture("./art/special_tiles/breakable_tile.png", shaders.Chunk_Shader)
 	for _, breakable_tile := range temp_level_json.BreakableTile {
 		level.BreakableTile = append(level.BreakableTile, BreakableTile{breakable_tile.Pos, Signal{breakable_tile.Signal, false}, breakable_tile_img})
 	}
 
+	imga, _, err := ebitenutil.NewImageFromFile("./art/special_tiles/buttonup.png")
+	if err != nil {
+		panic(err)
+	}
+	imgb, _, err := ebitenutil.NewImageFromFile("./art/special_tiles/buttonright.png")
+	if err != nil {
+		panic(err)
+	}
+	imgc, _, err := ebitenutil.NewImageFromFile("./art/special_tiles/buttondown.png")
+	if err != nil {
+		panic(err)
+	}
+	imgd, _, err := ebitenutil.NewImageFromFile("./art/special_tiles/buttonleft.png")
+	if err != nil {
+		panic(err)
+	}
+
+	trigger_images := []*ebiten.Image{
+		imga,
+		imgb,
+		imgc,
+		imgd,
+	}
+
 	level.TriggerTile = nil
 	for _, trigger_tile := range temp_level_json.TriggerTile {
-		level.TriggerTile = append(level.TriggerTile, TriggerTile{trigger_tile.Pos, Signal{trigger_tile.Signal, false}})
+		level.TriggerTile = append(level.TriggerTile, TriggerTile{trigger_tile.Pos, Signal{trigger_tile.Signal, false}, trigger_tile.Visible, trigger_images[trigger_tile.Direction]})
 	}
 
 	level.GunTiles = nil
@@ -150,19 +183,19 @@ func LoadLevel(level_name string) Level {
 
 	level.SpikeTiles = nil
 
-	imga, _, err := ebitenutil.NewImageFromFile("./levels/" + level_name + "/spikeup.png")
+	imga, _, err = ebitenutil.NewImageFromFile("./art/special_tiles/spikeup.png")
 	if err != nil {
 		panic(err)
 	}
-	imgb, _, err := ebitenutil.NewImageFromFile("./levels/" + level_name + "/spikeright.png")
+	imgb, _, err = ebitenutil.NewImageFromFile("./art/special_tiles/spikeright.png")
 	if err != nil {
 		panic(err)
 	}
-	imgc, _, err := ebitenutil.NewImageFromFile("./levels/" + level_name + "/spikedown.png")
+	imgc, _, err = ebitenutil.NewImageFromFile("./art/special_tiles/spikedown.png")
 	if err != nil {
 		panic(err)
 	}
-	imgd, _, err := ebitenutil.NewImageFromFile("./levels/" + level_name + "/spikeleft.png")
+	imgd, _, err = ebitenutil.NewImageFromFile("./art/special_tiles/spikeleft.png")
 	if err != nil {
 		panic(err)
 	}
@@ -176,6 +209,34 @@ func LoadLevel(level_name string) Level {
 
 	for _, spike_tile := range temp_level_json.SpikeTiles {
 		level.SpikeTiles = append(level.SpikeTiles, SpikeTile{spike_tile.Pos, spike_tile.Damage, spike_images[spike_tile.Direction]})
+	}
+
+	imga, _, err = ebitenutil.NewImageFromFile("./art/special_tiles/springup.png")
+	if err != nil {
+		panic(err)
+	}
+	imgb, _, err = ebitenutil.NewImageFromFile("./art/special_tiles/springright.png")
+	if err != nil {
+		panic(err)
+	}
+	imgc, _, err = ebitenutil.NewImageFromFile("./art/special_tiles/springdown.png")
+	if err != nil {
+		panic(err)
+	}
+	imgd, _, err = ebitenutil.NewImageFromFile("./art/special_tiles/springleft.png")
+	if err != nil {
+		panic(err)
+	}
+
+	spring_images := []*ebiten.Image{
+		imga,
+		imgb,
+		imgc,
+		imgd,
+	}
+
+	for _, spring_tiles := range temp_level_json.SpringTiles {
+		level.SpringTiles = append(level.SpringTiles, SpringTile{spring_tiles.Pos, spring_tiles.Power, spring_images[spring_tiles.Direction], spring_tiles.Direction})
 	}
 
 	for i, spawner := range level.Enemy_Spawners {

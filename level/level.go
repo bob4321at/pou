@@ -22,22 +22,28 @@ type Signal struct {
 }
 
 type Level struct {
-	Tiles           []Tile
-	TileSet_Img     *ebiten.Image
-	TileSet         []*ebiten.Image
-	Player_Loaded   bool
-	Player_Spawn    utils.Vec2
-	End_Pos         utils.Vec2
-	Sock_Img        *ebiten.Image
-	Enemy_Spawners  []EnemySpawner
-	BreakableTile   []BreakableTile
-	TriggerTile     []TriggerTile
-	GunTiles        []GunTile
-	SpikeTiles      []SpikeTile
+	Player_Loaded bool
+	Player_Spawn  utils.Vec2
+
+	End_Pos  utils.Vec2
+	Sock_Img *ebiten.Image
+
+	Tiles          []Tile
+	TileSet_Img    *ebiten.Image
+	TileSet        []*ebiten.Image
+	Enemy_Spawners []EnemySpawner
+	BreakableTile  []BreakableTile
+	TriggerTile    []TriggerTile
+	GunTiles       []GunTile
+	SpikeTiles     []SpikeTile
+	SpringTiles    []SpringTile
+
 	Send_Signals    []*Signal
 	Receive_Signals []*Signal
-	Enemies         []enemies.Enemy
-	Dropped_Guns    []gun.DroppedGunStruct
+
+	Enemies []enemies.Enemy
+
+	Dropped_Guns []gun.DroppedGunStruct
 
 	TileBorderColor color.RGBA
 	TileColor       color.RGBA
@@ -141,6 +147,20 @@ func (level *Level) Draw(screen *ebiten.Image) {
 		op := ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(spike_tile.Pos.X)+(camera.Camera.Pos.X), float64(spike_tile.Pos.Y)+(camera.Camera.Pos.Y))
 		screen.DrawImage(spike_tile.Img, &op)
+	}
+
+	for _, spring_tiles := range level.SpringTiles {
+		op := ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(spring_tiles.Pos.X)+(camera.Camera.Pos.X), float64(spring_tiles.Pos.Y)+(camera.Camera.Pos.Y))
+		screen.DrawImage(spring_tiles.Img, &op)
+	}
+
+	for _, trigger_tile := range level.TriggerTile {
+		if trigger_tile.Visible {
+			op := ebiten.DrawImageOptions{}
+			op.GeoM.Translate(float64(trigger_tile.Pos.X)+(camera.Camera.Pos.X), float64(trigger_tile.Pos.Y)+(camera.Camera.Pos.Y))
+			screen.DrawImage(trigger_tile.Img, &op)
+		}
 	}
 
 	for i := range level.Enemy_Spawners {

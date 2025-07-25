@@ -59,6 +59,29 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 				player.Health -= spike.Damage
 			}
 		}
+
+		for i, spring := range current_level.SpringTiles {
+			tile := &current_level.SpringTiles[i]
+
+			switch spring.Direction {
+			case 0:
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y + 28}, utils.Vec2{X: 32, Y: 4}) {
+					player.Vel.Y = -float64(spring.Power) * 3.2
+				}
+			case 1:
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y}, utils.Vec2{X: 4, Y: 32}) {
+					player.Vel.X = float64(spring.Power) * 3.2
+				}
+			case 2:
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y}, utils.Vec2{X: 32, Y: 4}) {
+					player.Vel.Y = float64(spring.Power) * 3.2
+				}
+			case 3:
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X + 28, Y: tile.Pos.Y}, utils.Vec2{X: 32, Y: 4}) {
+					player.Vel.X = -float64(spring.Power) * 3.2
+				}
+			}
+		}
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyT) {

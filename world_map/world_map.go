@@ -103,6 +103,7 @@ func NewWorldMap() WorldMapStruct {
 
 	world_map.World_Map_Player = *textures.NewAnimatedTexture("./art/ui/world_map_player.png", "")
 
+	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 0, Y: 0}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("tutorial", utils.Vec2{X: 71, Y: 39}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("test_real_level", utils.Vec2{X: 294, Y: 44}))
 	world_map.Points = append(world_map.Points, NewLevelPoint("arson", utils.Vec2{X: 597, Y: 54}))

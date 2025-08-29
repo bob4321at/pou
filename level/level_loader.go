@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"image/color"
 	"main/enemies"
+	"main/item"
 	"main/shaders"
 	"main/utils"
 	"os"
@@ -52,8 +53,16 @@ type SpikeTileJson struct {
 
 type SpringTileJson struct {
 	Pos       utils.Vec2
-	Power     int
+	Power     float64
 	Direction int
+}
+
+type ItemTileJson struct {
+	Pos           utils.Vec2
+	ItemId        int
+	CatagoryId    int
+	SendSignal    int
+	ReceiveSignal int
 }
 
 type LevelJson struct {
@@ -64,6 +73,7 @@ type LevelJson struct {
 	BreakableTile []BreakableTileJson
 	TriggerTile   []TriggerTileJson
 	GunTiles      []GunTileJson
+	ItemTiles     []ItemTileJson
 	SpikeTiles    []SpikeTileJson
 	SpringTiles   []SpringTileJson
 
@@ -115,9 +125,11 @@ func LoadLevel(level_name string) Level {
 	temp_level_tiles := []Tile{}
 
 	enemies.Level_Hitbox = nil
+	item.Level_Hitbox = nil
 	for _, tile := range temp_level_json.Tiles {
 		temp_level_tiles = append(temp_level_tiles, Tile{TileSet[tile.ID-1], tile.Pos})
 		enemies.Level_Hitbox = append(enemies.Level_Hitbox, tile.Pos)
+		item.Level_Hitbox = append(item.Level_Hitbox, tile.Pos)
 	}
 
 	level.Tiles = temp_level_tiles
@@ -179,6 +191,11 @@ func LoadLevel(level_name string) Level {
 	level.GunTiles = nil
 	for _, gun_tile := range temp_level_json.GunTiles {
 		level.GunTiles = append(level.GunTiles, GunTile{gun_tile.Pos, gun_tile.GunId, Signal{gun_tile.SendSignal, false}, Signal{gun_tile.ReceiveSignal, false}, false, nil})
+	}
+
+	level.ItemTiles = nil
+	for _, item_tile := range temp_level_json.ItemTiles {
+		level.ItemTiles = append(level.ItemTiles, ItemTile{item_tile.Pos, item_tile.CatagoryId, item_tile.ItemId, Signal{item_tile.SendSignal, false}, Signal{item_tile.ReceiveSignal, false}, false, nil})
 	}
 
 	level.SpikeTiles = nil
@@ -259,6 +276,11 @@ func LoadLevel(level_name string) Level {
 	for i := range level.GunTiles {
 		level.Send_Signals = append(level.Send_Signals, &level.GunTiles[i].SendSignal)
 		level.Receive_Signals = append(level.Receive_Signals, &level.GunTiles[i].ReceiveSignal)
+	}
+
+	for i := range level.ItemTiles {
+		level.Send_Signals = append(level.Send_Signals, &level.ItemTiles[i].SendSignal)
+		level.Receive_Signals = append(level.Receive_Signals, &level.ItemTiles[i].ReceiveSignal)
 	}
 
 	level.TileBorderColor = temp_level_json.TileBorderColor

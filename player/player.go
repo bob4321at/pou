@@ -5,6 +5,7 @@ import (
 	"main/camera"
 	"main/enemies"
 	"main/gun"
+	"main/item"
 	"main/level"
 	"main/shaders"
 	"main/utils"
@@ -25,6 +26,7 @@ type PlayerStruct struct {
 	Gun gun.Gun
 
 	Health          int
+	Max_Health      int
 	Previous_Health int
 	Health_Bar_Img  *ebiten.Image
 	I_Frames        float64
@@ -40,6 +42,8 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 	gun.Player_I_Frames = player.I_Frames
 	enemies.Player_Pos = &player.Pos
 	enemies.Player_Health = &player.Health
+	item.PlayerHealth = &player.Health
+	item.PlayerPos = &player.Pos
 
 	if player.I_Frames > 0 {
 		player.I_Frames -= 0.1
@@ -65,22 +69,28 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 
 			switch spring.Direction {
 			case 0:
-				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y + 28}, utils.Vec2{X: 32, Y: 4}) {
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y + 28}, utils.Vec2{X: 32, Y: 4}) {
 					player.Vel.Y = -float64(spring.Power) * 3.2
 				}
 			case 1:
-				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y}, utils.Vec2{X: 4, Y: 32}) {
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y}, utils.Vec2{X: 4, Y: 32}) {
 					player.Vel.X = float64(spring.Power) * 3.2
 				}
 			case 2:
-				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y}, utils.Vec2{X: 32, Y: 4}) {
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y}, utils.Vec2{X: 32, Y: 4}) {
 					player.Vel.Y = float64(spring.Power) * 3.2
 				}
 			case 3:
-				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X + 28, Y: tile.Pos.Y}, utils.Vec2{X: 32, Y: 4}) {
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X + 28, Y: tile.Pos.Y}, utils.Vec2{X: 32, Y: 4}) {
 					player.Vel.X = -float64(spring.Power) * 3.2
 				}
 			}
+		}
+	}
+
+	for _, item := range current_level.Items {
+		if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 32, Y: 48}, item.GetPos(), item.GetSize()) {
+			item.PickUp()
 		}
 	}
 
@@ -233,8 +243,12 @@ func NewPlayer(pos utils.Vec2) (player PlayerStruct) {
 	player.Gun = gun.CreateFistGun()
 
 	player.Health = 100
+	player.Max_Health = player.Health
 	player.Health_Bar_Img = ebiten.NewImage(250, 24)
 	player.Health_Bar_Img.Fill(color.RGBA{255, 50, 50, 255})
+
+	item.PlayerHealth = enemies.Player_Health
+	item.PlayerMaxHealth = player.Max_Health
 
 	player.Won = false
 

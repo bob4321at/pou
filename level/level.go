@@ -5,6 +5,7 @@ import (
 	"main/camera"
 	"main/enemies"
 	"main/gun"
+	"main/item"
 	"main/utils"
 
 	"github.com/bob4321at/textures"
@@ -35,6 +36,7 @@ type Level struct {
 	BreakableTile  []BreakableTile
 	TriggerTile    []TriggerTile
 	GunTiles       []GunTile
+	ItemTiles      []ItemTile
 	SpikeTiles     []SpikeTile
 	SpringTiles    []SpringTile
 
@@ -44,6 +46,7 @@ type Level struct {
 	Enemies []enemies.Enemy
 
 	Dropped_Guns []gun.DroppedGunStruct
+	Items        []item.Item
 
 	TileBorderColor color.RGBA
 	TileColor       color.RGBA
@@ -52,6 +55,7 @@ type Level struct {
 
 func (level *Level) Update() {
 	enemies.Breakable_Tile_Hitboxes = nil
+	item.Breakable_Tile_Hitboxes = nil
 
 	for _, enemy := range enemies.Enemies_To_Add {
 		level.Enemy_Spawners[0].Responsible_For = append(level.Enemy_Spawners[0].Responsible_For, enemy)
@@ -69,6 +73,7 @@ func (level *Level) Update() {
 		breakable_tile.Update(level)
 		if !breakable_tile.ReceiveSignal.Active {
 			enemies.Breakable_Tile_Hitboxes = append(enemies.Breakable_Tile_Hitboxes, breakable_tile.Pos)
+			item.Breakable_Tile_Hitboxes = append(item.Breakable_Tile_Hitboxes, breakable_tile.Pos)
 		}
 	}
 
@@ -94,13 +99,29 @@ func (level *Level) Update() {
 		dropped_gun.Update()
 	}
 
+	for i := range level.Items {
+		item := level.Items[i]
+		item.Update()
+	}
+
 	for i := range level.GunTiles {
 		gun_spawner := &level.GunTiles[i]
 		gun_spawner.Update(level)
 	}
 
+	for i := range level.ItemTiles {
+		item_tile := &level.ItemTiles[i]
+		item_tile.Update(level)
+	}
+
 	enemies.AllEnemies = level.Enemies
 	gun.Enemies_In_Level = level.Enemies
+
+	for i := len(level.Items) - 1; i >= 0; i-- {
+		if level.Items[i].PickedUp() {
+			utils.RemoveArrayElement(i, &level.Items)
+		}
+	}
 }
 
 func (level *Level) Draw(screen *ebiten.Image) {
@@ -172,6 +193,10 @@ func (level *Level) Draw(screen *ebiten.Image) {
 
 	for _, dropped_gun := range level.Dropped_Guns {
 		dropped_gun.Draw(screen)
+	}
+
+	for _, item := range level.Items {
+		item.Draw(screen)
 	}
 }
 

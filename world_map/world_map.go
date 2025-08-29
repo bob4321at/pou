@@ -20,21 +20,50 @@ type WorldMapStruct struct {
 	World_Map_Player_Reached    bool
 	World_Map_Player_Inputed    bool
 	World_Map_Player_Dir        bool
+
+	Finished bool
 }
 
 func (world_map *WorldMapStruct) Update() {
 	if world_map.World_Map_Player_Reached {
-		if world_map.World_Map_Player_Index+1 < len(world_map.Points) {
-			if ebiten.IsKeyPressed(ebiten.KeyD) && !world_map.World_Map_Player_Inputed {
-				world_map.World_Map_Player_Index += 1
-				world_map.World_Map_Player_Inputed = true
+		if ebiten.IsKeyPressed(ebiten.KeyD) {
+			if world_map.World_Map_Player_Index == len(world_map.Points)-1 {
+				world_map.Finished = true
 			}
 		}
 
-		if world_map.World_Map_Player_Index-1 >= 0 {
-			if ebiten.IsKeyPressed(ebiten.KeyA) && !world_map.World_Map_Player_Inputed {
-				world_map.World_Map_Player_Index -= 1
-				world_map.World_Map_Player_Inputed = true
+		comparison_point := world_map.Points[world_map.World_Map_Player_Index]
+		if world_map.World_Map_Player_Index+1 < len(world_map.Points) {
+			comparison_point = world_map.Points[world_map.World_Map_Player_Index+1]
+		}
+
+		if world_map.World_Map_Player_Pos.X < comparison_point.GetPos().X {
+			if world_map.World_Map_Player_Index+1 < len(world_map.Points) {
+				if ebiten.IsKeyPressed(ebiten.KeyD) && !world_map.World_Map_Player_Inputed {
+					world_map.World_Map_Player_Index += 1
+					world_map.World_Map_Player_Inputed = true
+				}
+			}
+
+			if world_map.World_Map_Player_Index-1 >= 0 {
+				if ebiten.IsKeyPressed(ebiten.KeyA) && !world_map.World_Map_Player_Inputed {
+					world_map.World_Map_Player_Index -= 1
+					world_map.World_Map_Player_Inputed = true
+				}
+			}
+		} else {
+			if world_map.World_Map_Player_Index+1 < len(world_map.Points) {
+				if ebiten.IsKeyPressed(ebiten.KeyA) && !world_map.World_Map_Player_Inputed {
+					world_map.World_Map_Player_Index += 1
+					world_map.World_Map_Player_Inputed = true
+				}
+			}
+
+			if world_map.World_Map_Player_Index-1 >= 0 {
+				if ebiten.IsKeyPressed(ebiten.KeyD) && !world_map.World_Map_Player_Inputed {
+					world_map.World_Map_Player_Index -= 1
+					world_map.World_Map_Player_Inputed = true
+				}
 			}
 		}
 
@@ -92,28 +121,17 @@ func (world_map *WorldMapStruct) Draw(screen *ebiten.Image) {
 	world_map.World_Map_Player.Draw(screen, &op)
 }
 
-func NewWorldMap() WorldMapStruct {
+func NewWorldMap(world_map_img_path string, points ...PointOfIntrest) WorldMapStruct {
 	world_map := WorldMapStruct{}
 
 	var err error
-	world_map.Img, _, err = ebitenutil.NewImageFromFile("./art/menus/world_map.png")
+	world_map.Img, _, err = ebitenutil.NewImageFromFile(world_map_img_path)
 	if err != nil {
 		panic(err)
 	}
 
 	world_map.World_Map_Player = *textures.NewAnimatedTexture("./art/ui/world_map_player.png", "")
-
-	world_map.Points = append(world_map.Points, NewLevelPoint("test", utils.Vec2{X: 0, Y: 0}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("tutorial", utils.Vec2{X: 71, Y: 39}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("test_real_level", utils.Vec2{X: 294, Y: 44}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("arson", utils.Vec2{X: 597, Y: 54}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("red_jumping", utils.Vec2{X: 615, Y: 187}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("hard", utils.Vec2{X: 511, Y: 228}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("arena", utils.Vec2{X: 483, Y: 141}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("plateform", utils.Vec2{X: 152, Y: 119}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("spikes", utils.Vec2{X: 56, Y: 204}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("deathrun", utils.Vec2{X: 108, Y: 303}))
-	world_map.Points = append(world_map.Points, NewLevelPoint("turret", utils.Vec2{X: 607, Y: 321}))
+	world_map.Points = points
 
 	return world_map
 }

@@ -8,7 +8,7 @@ import (
 
 type SpringTile struct {
 	Pos       utils.Vec2
-	Power     int
+	Power     float64
 	Img       *ebiten.Image
 	Direction int
 }

@@ -115,7 +115,7 @@ func NewGreenGuy(pos utils.Vec2) Enemy {
 	blue_guy.Health = 16
 	blue_guy.Max_Health = blue_guy.Health
 
-	blue_guy.Heal_Timer = 6
+	blue_guy.Heal_Timer = 10
 	blue_guy.Max_Heal_timer = blue_guy.Heal_Timer
 
 	blue_guy.Img = textures.NewTexture("./art/enemies/green_guy.png", shaders.Flash_Shader)

@@ -86,7 +86,9 @@ func (scene *GameScene) Draw(display *ebiten.Image) {
 		scene.Current_Level.Draw(scene.Screen.Img)
 	}
 
-	scene.Screen.Draw(display, &ebiten.DrawImageOptions{})
+	display_op := ebiten.DrawImageOptions{}
+	display_op.GeoM.Translate(-2, -2)
+	scene.Screen.Draw(display, &display_op)
 
 	op := ebiten.DrawImageOptions{}
 	op.GeoM.Translate(10, 10)

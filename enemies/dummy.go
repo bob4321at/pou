@@ -71,7 +71,7 @@ func (dummy *Dummy) HitPlayer() {}
 func NewDummy(pos utils.Vec2) Enemy {
 	target := Dummy{}
 	target.Pos = pos
-	target.Health = 50
+	target.Health = 10
 
 	target.Img = textures.NewTexture("./art/enemies/dummy.png", shaders.Flash_Shader)
 

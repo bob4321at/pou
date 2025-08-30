@@ -2,6 +2,7 @@ package level
 
 import (
 	"encoding/json"
+	"fmt"
 	"image/color"
 	"main/enemies"
 	"main/item"
@@ -65,17 +66,26 @@ type ItemTileJson struct {
 	ReceiveSignal int
 }
 
+type MovingPlatformTileJson struct {
+	Pos        utils.Vec2
+	Signal     int
+	Track      int
+	TrackIndex int
+	Loop       bool
+}
+
 type LevelJson struct {
-	Player_Spawn  utils.Vec2
-	End           utils.Vec2
-	Tiles         []TileJson
-	Enemies       []EnemySpawnerJson
-	BreakableTile []BreakableTileJson
-	TriggerTile   []TriggerTileJson
-	GunTiles      []GunTileJson
-	ItemTiles     []ItemTileJson
-	SpikeTiles    []SpikeTileJson
-	SpringTiles   []SpringTileJson
+	Player_Spawn        utils.Vec2
+	End                 utils.Vec2
+	Tiles               []TileJson
+	Enemies             []EnemySpawnerJson
+	BreakableTile       []BreakableTileJson
+	TriggerTile         []TriggerTileJson
+	GunTiles            []GunTileJson
+	ItemTiles           []ItemTileJson
+	SpikeTiles          []SpikeTileJson
+	SpringTiles         []SpringTileJson
+	MovingPlatformTiles []MovingPlatformTileJson
 
 	TileBorderColor color.RGBA
 	TileColor       color.RGBA
@@ -254,6 +264,25 @@ func LoadLevel(level_name string) Level {
 
 	for _, spring_tiles := range temp_level_json.SpringTiles {
 		level.SpringTiles = append(level.SpringTiles, SpringTile{spring_tiles.Pos, spring_tiles.Power, spring_images[spring_tiles.Direction], spring_tiles.Direction})
+	}
+
+	level.MovingPlatformPaths = map[int]map[int]utils.Vec2{}
+	level.MovingPlatformLoopOrNot = map[int]bool{}
+
+	for _, moving_platform_tile := range temp_level_json.MovingPlatformTiles {
+		if _, exists := level.MovingPlatformPaths[moving_platform_tile.Track]; !exists {
+			level.MovingPlatformPaths[moving_platform_tile.Track] = map[int]utils.Vec2{}
+		}
+		if _, exists := level.MovingPlatformLoopOrNot[moving_platform_tile.Track]; !exists {
+			if moving_platform_tile.TrackIndex == 0 {
+				level.MovingPlatformLoopOrNot[moving_platform_tile.Track] = moving_platform_tile.Loop
+			}
+		}
+		level.MovingPlatformPaths[moving_platform_tile.Track][moving_platform_tile.TrackIndex] = moving_platform_tile.Pos
+	}
+
+	for i, moving_platform_path := range level.MovingPlatformPaths {
+		level.MovingPlatforms = append(level.MovingPlatforms, NewMovingPlatform(moving_platform_path[0], i))
 	}
 
 	for i, spawner := range level.Enemy_Spawners {

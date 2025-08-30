@@ -1,6 +1,7 @@
 package player
 
 import (
+	"fmt"
 	"image/color"
 	"main/camera"
 	"main/enemies"
@@ -17,8 +18,11 @@ import (
 )
 
 type PlayerStruct struct {
-	Pos       utils.Vec2
-	Vel       utils.Vec2
+	Pos utils.Vec2
+	Vel utils.Vec2
+
+	Moving_Platform_Vel utils.Vec2
+
 	Dir       bool
 	Img       *textures.AnimatedTexture
 	Charge_UI textures.RenderableTexture
@@ -136,11 +140,6 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 		player.Dir = true
 	}
 
-	collision_x, _ := current_level.CheckCollision(utils.Vec2{X: player.Pos.X + player.Vel.X + 640/2 - 14, Y: player.Pos.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42})
-	if collision_x {
-		player.Vel.X = 0
-	}
-
 	collision_y, _ := current_level.CheckCollision(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42})
 	if collision_y {
 		if player.Vel.Y > 0 {
@@ -159,6 +158,7 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 			}
 		} else {
 			player.Vel.Y = 0
+			player.Moving_Platform_Vel.Y = 0
 		}
 	} else {
 		if player.Vel.Y > 0 {
@@ -166,6 +166,51 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 		} else {
 			player.Img.Current_Animation = 3
 		}
+	}
+
+	player.Moving_Platform_Vel = utils.Vec2{}
+
+	for _, movingplatform := range current_level.MovingPlatforms {
+		if player.Vel.Y > 0 {
+			if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y + 38}, utils.Vec2{X: 28, Y: 4}, utils.Vec2{X: movingplatform.Pos.X - 32 + movingplatform.Vel.X, Y: movingplatform.Pos.Y - 8 + movingplatform.Vel.Y}, utils.Vec2{X: 64, Y: 4}) {
+				if player.Vel.Y > 0 {
+					if math.Abs(player.Vel.X) >= 0.1 {
+						player.Img.Current_Animation = 1
+					} else {
+						player.Img.Current_Animation = 0
+					}
+
+					player.Vel.Y = 0
+					if ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeySpace) {
+						player.Vel.Y = -4
+					}
+					if !ebiten.IsKeyPressed(ebiten.KeyA) && !ebiten.IsKeyPressed(ebiten.KeyD) {
+						player.Vel.X -= player.Vel.X / 5
+					}
+				} else {
+					player.Vel.Y = 0
+				}
+			}
+
+			if movingplatform.Vel.Y > 0 {
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: movingplatform.Pos.X - 32 + movingplatform.Vel.X, Y: movingplatform.Pos.Y - 8 + movingplatform.Vel.Y - 4}, utils.Vec2{X: 64, Y: 20}) {
+					fmt.Println(movingplatform.Vel)
+					player.Moving_Platform_Vel.X = movingplatform.Vel.X
+					player.Moving_Platform_Vel.Y = movingplatform.Vel.Y
+				}
+			} else {
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: movingplatform.Pos.X - 32 + movingplatform.Vel.X, Y: movingplatform.Pos.Y - 8 + movingplatform.Vel.Y - 1}, utils.Vec2{X: 64, Y: 18}) {
+					fmt.Println(movingplatform.Vel)
+					player.Moving_Platform_Vel.X = movingplatform.Vel.X
+					player.Moving_Platform_Vel.Y = movingplatform.Vel.Y
+				}
+			}
+		}
+	}
+	collision_x, _ := current_level.CheckCollision(utils.Vec2{X: player.Pos.X + player.Vel.X + player.Moving_Platform_Vel.X + 640/2 - 14, Y: player.Pos.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42})
+	if collision_x {
+		player.Vel.X = 0
+		player.Moving_Platform_Vel.X = 0
 	}
 
 	for i := range current_level.TriggerTile {
@@ -183,8 +228,8 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 	camera.Camera.Pos.X = -player.Pos.X
 	camera.Camera.Pos.Y = -player.Pos.Y
 
-	player.Pos.X += player.Vel.X
-	player.Pos.Y += player.Vel.Y
+	player.Pos.X += player.Vel.X + player.Moving_Platform_Vel.X
+	player.Pos.Y += player.Vel.Y + player.Moving_Platform_Vel.Y
 
 	player.Gun.Update()
 

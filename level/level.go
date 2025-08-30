@@ -40,6 +40,10 @@ type Level struct {
 	SpikeTiles     []SpikeTile
 	SpringTiles    []SpringTile
 
+	MovingPlatforms         []MovingPlatform
+	MovingPlatformPaths     map[int]map[int]utils.Vec2
+	MovingPlatformLoopOrNot map[int]bool
+
 	Send_Signals    []*Signal
 	Receive_Signals []*Signal
 
@@ -114,6 +118,11 @@ func (level *Level) Update() {
 		item_tile.Update(level)
 	}
 
+	for i := range level.MovingPlatforms {
+		platform := &level.MovingPlatforms[i]
+		platform.Update(level)
+	}
+
 	enemies.AllEnemies = level.Enemies
 	gun.Enemies_In_Level = level.Enemies
 
@@ -182,6 +191,10 @@ func (level *Level) Draw(screen *ebiten.Image) {
 			op.GeoM.Translate(float64(trigger_tile.Pos.X)+(camera.Camera.Pos.X), float64(trigger_tile.Pos.Y)+(camera.Camera.Pos.Y))
 			screen.DrawImage(trigger_tile.Img, &op)
 		}
+	}
+
+	for _, moving_platform := range level.MovingPlatforms {
+		moving_platform.Draw(screen)
 	}
 
 	for i := range level.Enemy_Spawners {

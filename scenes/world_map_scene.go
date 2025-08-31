@@ -46,7 +46,7 @@ func NewWorldMapScene() Scene {
 			worldmap.NewLevelPoint("spikes_come", utils.Vec2{X: 597, Y: 54}),
 			worldmap.NewLevelPoint("spring_land", utils.Vec2{X: 615, Y: 187}),
 			worldmap.NewLevelPoint("med_intro", utils.Vec2{X: 511, Y: 228}),
-			worldmap.NewLevelPoint("arena", utils.Vec2{X: 483, Y: 141}),
+			worldmap.NewLevelPoint("moving_platform_intro", utils.Vec2{X: 483, Y: 141}),
 			worldmap.NewLevelPoint("plateform", utils.Vec2{X: 152, Y: 119}),
 			worldmap.NewLevelPoint("spikes", utils.Vec2{X: 56, Y: 204}),
 			worldmap.NewLevelPoint("deathrun", utils.Vec2{X: 108, Y: 303}),

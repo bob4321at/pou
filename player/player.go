@@ -1,7 +1,6 @@
 package player
 
 import (
-	"fmt"
 	"image/color"
 	"main/camera"
 	"main/enemies"
@@ -182,7 +181,7 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 
 					player.Vel.Y = 0
 					if ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeySpace) {
-						player.Vel.Y = -4
+						player.Vel.Y = -4 + movingplatform.Vel.Y
 					}
 					if !ebiten.IsKeyPressed(ebiten.KeyA) && !ebiten.IsKeyPressed(ebiten.KeyD) {
 						player.Vel.X -= player.Vel.X / 5
@@ -194,13 +193,11 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 
 			if movingplatform.Vel.Y > 0 {
 				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: movingplatform.Pos.X - 32 + movingplatform.Vel.X, Y: movingplatform.Pos.Y - 8 + movingplatform.Vel.Y - 4}, utils.Vec2{X: 64, Y: 20}) {
-					fmt.Println(movingplatform.Vel)
 					player.Moving_Platform_Vel.X = movingplatform.Vel.X
 					player.Moving_Platform_Vel.Y = movingplatform.Vel.Y
 				}
 			} else {
 				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: movingplatform.Pos.X - 32 + movingplatform.Vel.X, Y: movingplatform.Pos.Y - 8 + movingplatform.Vel.Y - 1}, utils.Vec2{X: 64, Y: 18}) {
-					fmt.Println(movingplatform.Vel)
 					player.Moving_Platform_Vel.X = movingplatform.Vel.X
 					player.Moving_Platform_Vel.Y = movingplatform.Vel.Y
 				}

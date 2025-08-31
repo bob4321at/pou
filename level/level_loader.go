@@ -2,7 +2,6 @@ package level
 
 import (
 	"encoding/json"
-	"fmt"
 	"image/color"
 	"main/enemies"
 	"main/item"

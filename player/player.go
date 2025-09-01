@@ -17,16 +17,19 @@ import (
 )
 
 type PlayerStruct struct {
-	Pos utils.Vec2
-	Vel utils.Vec2
+	Pos   utils.Vec2
+	Vel   utils.Vec2
+	Speed float64
 
 	Moving_Platform_Vel utils.Vec2
 
-	Dir       bool
-	Img       *textures.AnimatedTexture
-	Charge_UI textures.RenderableTexture
+	Dir                  bool
+	Img                  *textures.AnimatedTexture
+	WithFlyingBootsImage *textures.AnimatedTexture
+	Charge_UI            textures.RenderableTexture
 
-	Gun gun.Gun
+	Gun              gun.Gun
+	DamageMultiplier float64
 
 	Health          int
 	Max_Health      int
@@ -43,10 +46,14 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 	gun.Player_Pos = &player.Pos
 	gun.Player_Vel = &player.Vel
 	gun.Player_I_Frames = player.I_Frames
+	gun.Player_Damage_Multiplier = &player.DamageMultiplier
 	enemies.Player_Pos = &player.Pos
 	enemies.Player_Health = &player.Health
+
 	item.PlayerHealth = &player.Health
 	item.PlayerPos = &player.Pos
+	item.PlayerSpeed = &player.Speed
+	item.PlayerDamageMultiplier = &player.DamageMultiplier
 
 	if player.I_Frames > 0 {
 		player.I_Frames -= 0.1
@@ -54,7 +61,7 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 		player.I_Frames = 0
 		for ei := range current_level.Enemies {
 			enemy := current_level.Enemies[ei]
-			if utils.Collide(utils.Vec2{X: player.Pos.X + player.Vel.X + 640/2 - 14, Y: player.Pos.Y + 360/2 - 18}, utils.Vec2{X: 32, Y: 48}, enemy.GetPosition(), enemy.GetSize()) {
+			if utils.Collide(utils.Vec2{X: player.Pos.X + player.Vel.X*player.Speed + 640/2 - 14, Y: player.Pos.Y + 360/2 - 18}, utils.Vec2{X: 32, Y: 48}, enemy.GetPosition(), enemy.GetSize()) {
 				enemy.HitPlayer()
 			}
 		}
@@ -72,19 +79,19 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 
 			switch spring.Direction {
 			case 0:
-				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y + 28}, utils.Vec2{X: 32, Y: 4}) {
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X*player.Speed, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y + 28}, utils.Vec2{X: 32, Y: 4}) {
 					player.Vel.Y = -float64(spring.Power) * 3.2
 				}
 			case 1:
-				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y}, utils.Vec2{X: 4, Y: 32}) {
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X*player.Speed, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y}, utils.Vec2{X: 4, Y: 32}) {
 					player.Vel.X = float64(spring.Power) * 3.2
 				}
 			case 2:
-				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y}, utils.Vec2{X: 32, Y: 4}) {
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X*player.Speed, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X, Y: tile.Pos.Y}, utils.Vec2{X: 32, Y: 4}) {
 					player.Vel.Y = float64(spring.Power) * 3.2
 				}
 			case 3:
-				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X + 28, Y: tile.Pos.Y}, utils.Vec2{X: 32, Y: 4}) {
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X*player.Speed, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: tile.Pos.X + 28, Y: tile.Pos.Y}, utils.Vec2{X: 32, Y: 4}) {
 					player.Vel.X = -float64(spring.Power) * 3.2
 				}
 			}
@@ -105,11 +112,18 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 		player.I_Frames = 1
 	}
 
+	player.Img.Update()
 	player.Img.SetUniforms(map[string]any{
 		"I": player.I_Frames,
 	})
 
+	player.WithFlyingBootsImage.Update()
+	player.WithFlyingBootsImage.SetUniforms(map[string]any{
+		"I": player.I_Frames,
+	})
+
 	player.Img.Current_Animation = 0
+	player.WithFlyingBootsImage.Current_Animation = 0
 
 	if !current_level.Player_Loaded {
 		player.Vel.X = 0
@@ -144,8 +158,10 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 		if player.Vel.Y > 0 {
 			if math.Abs(player.Vel.X) >= 0.1 {
 				player.Img.Current_Animation = 1
+				player.WithFlyingBootsImage.Current_Animation = 1
 			} else {
 				player.Img.Current_Animation = 0
+				player.WithFlyingBootsImage.Current_Animation = 0
 			}
 
 			player.Vel.Y = 0
@@ -162,8 +178,10 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 	} else {
 		if player.Vel.Y > 0 {
 			player.Img.Current_Animation = 2
+			player.WithFlyingBootsImage.Current_Animation = 2
 		} else {
 			player.Img.Current_Animation = 3
+			player.WithFlyingBootsImage.Current_Animation = 3
 		}
 	}
 
@@ -175,8 +193,10 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 				if player.Vel.Y > 0 {
 					if math.Abs(player.Vel.X) >= 0.1 {
 						player.Img.Current_Animation = 1
+						player.WithFlyingBootsImage.Current_Animation = 1
 					} else {
 						player.Img.Current_Animation = 0
+						player.WithFlyingBootsImage.Current_Animation = 0
 					}
 
 					player.Vel.Y = 0
@@ -192,19 +212,19 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 			}
 
 			if movingplatform.Vel.Y > 0 {
-				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: movingplatform.Pos.X - 32 + movingplatform.Vel.X, Y: movingplatform.Pos.Y - 8 + movingplatform.Vel.Y - 4}, utils.Vec2{X: 64, Y: 20}) {
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X*player.Speed, Y: player.Pos.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: movingplatform.Pos.X - 32 + movingplatform.Vel.X, Y: movingplatform.Pos.Y - 8 + movingplatform.Vel.Y - 4}, utils.Vec2{X: 64, Y: 20}) {
 					player.Moving_Platform_Vel.X = movingplatform.Vel.X
 					player.Moving_Platform_Vel.Y = movingplatform.Vel.Y
 				}
 			} else {
-				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X, Y: player.Pos.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: movingplatform.Pos.X - 32 + movingplatform.Vel.X, Y: movingplatform.Pos.Y - 8 + movingplatform.Vel.Y - 1}, utils.Vec2{X: 64, Y: 18}) {
+				if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14 + player.Vel.X*player.Speed, Y: player.Pos.Y + 360/2 - 18 + player.Vel.Y}, utils.Vec2{X: 28, Y: 42}, utils.Vec2{X: movingplatform.Pos.X - 32 + movingplatform.Vel.X, Y: movingplatform.Pos.Y - 8 + movingplatform.Vel.Y - 1}, utils.Vec2{X: 64, Y: 18}) {
 					player.Moving_Platform_Vel.X = movingplatform.Vel.X
 					player.Moving_Platform_Vel.Y = movingplatform.Vel.Y
 				}
 			}
 		}
 	}
-	collision_x, _ := current_level.CheckCollision(utils.Vec2{X: player.Pos.X + player.Vel.X + player.Moving_Platform_Vel.X + 640/2 - 14, Y: player.Pos.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42})
+	collision_x, _ := current_level.CheckCollision(utils.Vec2{X: player.Pos.X + player.Vel.X*player.Speed + player.Moving_Platform_Vel.X + 640/2 - 14, Y: player.Pos.Y + 360/2 - 18}, utils.Vec2{X: 28, Y: 42})
 	if collision_x {
 		player.Vel.X = 0
 		player.Moving_Platform_Vel.X = 0
@@ -225,7 +245,7 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 	camera.Camera.Pos.X = -player.Pos.X
 	camera.Camera.Pos.Y = -player.Pos.Y
 
-	player.Pos.X += player.Vel.X + player.Moving_Platform_Vel.X
+	player.Pos.X += player.Vel.X*player.Speed + player.Moving_Platform_Vel.X
 	player.Pos.Y += player.Vel.Y + player.Moving_Platform_Vel.Y
 
 	player.Gun.Update()
@@ -241,7 +261,6 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 }
 
 func (player *PlayerStruct) Draw(screen *ebiten.Image) {
-	player.Img.Update()
 
 	op := ebiten.DrawImageOptions{}
 
@@ -253,7 +272,11 @@ func (player *PlayerStruct) Draw(screen *ebiten.Image) {
 
 	op.GeoM.Translate(640/2-16, 360/2-24)
 
-	player.Img.Draw(screen, &op)
+	if player.Speed == 1 {
+		player.Img.Draw(screen, &op)
+	} else {
+		player.WithFlyingBootsImage.Draw(screen, &op)
+	}
 
 	player.Gun.Draw(screen)
 
@@ -275,12 +298,14 @@ func (player *PlayerStruct) Reset(spawn_pos utils.Vec2) {
 	player.Health = 100
 	player.Won = false
 	player.Charged = 0
+	player.Speed = 1
 }
 
 func NewPlayer(pos utils.Vec2) (player PlayerStruct) {
 	player.Pos = pos
 
 	player.Img = textures.NewAnimatedTexture("./art/player.png", shaders.Flash_Shader)
+	player.WithFlyingBootsImage = textures.NewAnimatedTexture("./art/player_flying_boots.png", shaders.Flash_Shader)
 	player.Charge_UI = textures.NewTexture("./art/ui/charge.png", shaders.Fill_Shader)
 	player.Gun = gun.CreateFistGun()
 
@@ -293,6 +318,9 @@ func NewPlayer(pos utils.Vec2) (player PlayerStruct) {
 	item.PlayerMaxHealth = player.Max_Health
 
 	player.Won = false
+	player.Speed = 1
+
+	player.DamageMultiplier = 1
 
 	return player
 }

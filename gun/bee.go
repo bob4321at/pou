@@ -83,7 +83,7 @@ func (bullet *BeeBullet) Collide(position utils.Vec2, size utils.Vec2) bool {
 }
 
 func (bullet *BeeBullet) GetDamage() int {
-	return bullet.Damage
+	return bullet.Damage * int(*Player_Damage_Multiplier)
 }
 
 func (bullet *BeeBullet) CheckRemoval() bool {

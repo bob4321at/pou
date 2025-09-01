@@ -34,7 +34,7 @@ func (bullet *FistBullet) Collide(position utils.Vec2, size utils.Vec2) bool {
 }
 
 func (bullet *FistBullet) GetDamage() int {
-	return bullet.Damage
+	return bullet.Damage * int(*Player_Damage_Multiplier)
 }
 
 func (bullet *FistBullet) CheckRemoval() bool {
@@ -89,7 +89,7 @@ func (bullet *FistAirBullet) Collide(position utils.Vec2, size utils.Vec2) bool 
 }
 
 func (bullet *FistAirBullet) GetDamage() int {
-	return bullet.Damage
+	return bullet.Damage * int(*Player_Damage_Multiplier)
 }
 
 func (bullet *FistAirBullet) CheckRemoval() bool {

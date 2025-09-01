@@ -11,6 +11,7 @@ import (
 var Player_Pos *utils.Vec2
 var Player_Vel *utils.Vec2
 var Player_I_Frames float64
+var Player_Damage_Multiplier *float64
 
 var Enemies_In_Level []enemies.Enemy
 

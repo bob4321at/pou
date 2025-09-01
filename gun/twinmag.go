@@ -44,7 +44,7 @@ func (bullet *TwinMagBullet) Collide(position utils.Vec2, size utils.Vec2) bool 
 }
 
 func (bullet *TwinMagBullet) GetDamage() int {
-	return bullet.Damage
+	return bullet.Damage * int(*Player_Damage_Multiplier)
 }
 
 func (bullet *TwinMagBullet) CheckRemoval() bool {
@@ -99,7 +99,7 @@ func (bullet *BigTwinMagBullet) Collide(position utils.Vec2, size utils.Vec2) bo
 }
 
 func (bullet *BigTwinMagBullet) GetDamage() int {
-	return bullet.Damage
+	return bullet.Damage * int(*Player_Damage_Multiplier)
 }
 
 func (bullet *BigTwinMagBullet) CheckRemoval() bool {

@@ -11,6 +11,8 @@ import (
 var PlayerHealth *int
 var PlayerMaxHealth int
 var PlayerPos *utils.Vec2
+var PlayerSpeed *float64
+var PlayerDamageMultiplier *float64
 
 var Level_Hitbox []utils.Vec2
 var Breakable_Tile_Hitboxes []utils.Vec2
@@ -56,5 +58,9 @@ var ItemCreateFuncs = [][]func(Pos utils.Vec2) Item{
 	nil,
 	{
 		NewMedKit,
+	},
+	{
+		NewFlyingBoot,
+		NewCoffeeBoot,
 	},
 }

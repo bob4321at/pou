@@ -73,6 +73,19 @@ type MovingPlatformTileJson struct {
 	Loop       bool
 }
 
+type WaterTileJson struct {
+	Pos           utils.Vec2
+	Top_Bottom    bool
+	ReceiveSignal int
+}
+
+type FloodTileJson struct {
+	Pos           utils.Vec2
+	Speed         int
+	SendSignal    int
+	ReceiveSignal int
+}
+
 type LevelJson struct {
 	Player_Spawn        utils.Vec2
 	End                 utils.Vec2
@@ -85,6 +98,8 @@ type LevelJson struct {
 	SpikeTiles          []SpikeTileJson
 	SpringTiles         []SpringTileJson
 	MovingPlatformTiles []MovingPlatformTileJson
+	WaterTiles          []WaterTileJson
+	FloodTiles          []FloodTileJson
 
 	TileBorderColor color.RGBA
 	TileColor       color.RGBA
@@ -284,6 +299,24 @@ func LoadLevel(level_name string) Level {
 		level.MovingPlatforms = append(level.MovingPlatforms, NewMovingPlatform(moving_platform_path[0], i))
 	}
 
+	for _, water := range temp_level_json.WaterTiles {
+		if water.ReceiveSignal == 0 {
+			level.WaterTiles = append(level.WaterTiles, WaterTile{water.Pos, water.Top_Bottom, Signal{water.ReceiveSignal, true}, Water_Tile_Images[water.Top_Bottom]})
+		} else {
+			level.WaterTiles = append(level.WaterTiles, WaterTile{water.Pos, water.Top_Bottom, Signal{water.ReceiveSignal, false}, Water_Tile_Images[water.Top_Bottom]})
+		}
+	}
+
+	level.WaterLevel = 1000000000000
+
+	for _, flood := range temp_level_json.FloodTiles {
+		if flood.ReceiveSignal == 0 {
+			level.WaterLevel = flood.Pos.Y
+		} else {
+			level.FloodTiles = append(level.FloodTiles, FloodTile{flood.Pos, flood.Speed, Signal{flood.SendSignal, false}, Signal{flood.ReceiveSignal, false}})
+		}
+	}
+
 	for i, spawner := range level.Enemy_Spawners {
 		if spawner.ReceiveSignal.Id == 0 {
 			level.Send_Signals = append(level.Send_Signals, &level.Enemy_Spawners[i].SendSignal)
@@ -309,6 +342,15 @@ func LoadLevel(level_name string) Level {
 	for i := range level.ItemTiles {
 		level.Send_Signals = append(level.Send_Signals, &level.ItemTiles[i].SendSignal)
 		level.Receive_Signals = append(level.Receive_Signals, &level.ItemTiles[i].ReceiveSignal)
+	}
+
+	for i := range level.WaterTiles {
+		level.Receive_Signals = append(level.Receive_Signals, &level.WaterTiles[i].ReceiveSignal)
+	}
+
+	for i := range level.FloodTiles {
+		level.Send_Signals = append(level.Send_Signals, &level.FloodTiles[i].SendSignal)
+		level.Receive_Signals = append(level.Receive_Signals, &level.FloodTiles[i].ReceiveSignal)
 	}
 
 	level.TileBorderColor = temp_level_json.TileBorderColor

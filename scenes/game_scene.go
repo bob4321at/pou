@@ -2,10 +2,11 @@ package scenes
 
 import (
 	"image/color"
+	"main/camera"
 	"main/level"
 	"main/music"
 	"main/player"
-	"main/shaders"
+	"main/shader"
 	"main/utils"
 	worldmap "main/world_map"
 	"strconv"
@@ -16,11 +17,12 @@ import (
 )
 
 type GameScene struct {
-	SetedUp       bool
-	Music         music.MusicStruct
-	Player        player.PlayerStruct
-	Screen        *textures.Texture
-	Current_Level level.Level
+	SetedUp            bool
+	Music              music.MusicStruct
+	Player             player.PlayerStruct
+	Screen             *textures.Texture
+	Water_Shader_Layer *textures.Texture
+	Current_Level      level.Level
 }
 
 func (scene *GameScene) Setup() {
@@ -30,7 +32,9 @@ func (scene *GameScene) Setup() {
 	}
 	scene.Music = music.NewMusic("./music/song.mp3")
 
-	scene.Screen = textures.NewTexture("./art/display.png", shaders.Test_Refraction_Shader)
+	scene.Screen = textures.NewTexture("./art/display.png", shader.Camera_Shader)
+
+	scene.Water_Shader_Layer = textures.NewTexture("./art/display.png", shader.Water_shader)
 
 	scene.Player = player.NewPlayer(utils.Vec2{X: 100, Y: 100})
 
@@ -76,8 +80,7 @@ func (scene *GameScene) Reset() {
 }
 
 func (scene *GameScene) Draw(display *ebiten.Image) {
-	display.Fill(scene.Current_Level.BackgroundColor)
-
+	scene.Water_Shader_Layer.Img.Fill(color.RGBA{0, 0, 0, 0})
 	scene.Screen.Img.Fill(color.RGBA{0, 0, 0, 0})
 
 	scene.Player.Draw(scene.Screen.Img)
@@ -88,7 +91,40 @@ func (scene *GameScene) Draw(display *ebiten.Image) {
 
 	display_op := ebiten.DrawImageOptions{}
 	display_op.GeoM.Translate(-2, -2)
+	display_op.Blend = ebiten.BlendSourceOver
+
+	scene.Water_Shader_Layer.SetUniforms(map[string]any{
+		"Water_Level": scene.Current_Level.WaterLevel,
+		"Camera_Y":    camera.Camera.Pos.Y,
+		"Camera_X":    camera.Camera.Pos.X,
+		"Game_Time":   utils.GameTime,
+		"R":           float64(scene.Current_Level.TileBorderColor.R) / 255,
+		"G":           float64(scene.Current_Level.TileBorderColor.G) / 255,
+		"B":           float64(scene.Current_Level.TileBorderColor.B) / 255,
+
+		"RR": float64(scene.Current_Level.TileColor.R) / 255,
+		"GG": float64(scene.Current_Level.TileColor.G) / 255,
+		"BB": float64(scene.Current_Level.TileColor.B) / 255,
+	})
+
+	for _, water_tile := range scene.Current_Level.WaterTiles {
+		op := ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(water_tile.Pos.X)+(camera.Camera.Pos.X), float64(water_tile.Pos.Y)+(camera.Camera.Pos.Y))
+		water_tile.Image.SetUniforms(map[string]any{
+			"R": float64(scene.Current_Level.TileBorderColor.R) / 255,
+			"G": float64(scene.Current_Level.TileBorderColor.G) / 255,
+			"B": float64(scene.Current_Level.TileBorderColor.B) / 255,
+
+			"RR": float64(scene.Current_Level.TileColor.R) / 255,
+			"GG": float64(scene.Current_Level.TileColor.G) / 255,
+			"BB": float64(scene.Current_Level.TileColor.B) / 255,
+		})
+		water_tile.Image.Draw(scene.Water_Shader_Layer.Img, &op)
+	}
+
+	display.Fill(scene.Current_Level.BackgroundColor)
 	scene.Screen.Draw(display, &display_op)
+	scene.Water_Shader_Layer.Draw(display, &display_op)
 
 	op := ebiten.DrawImageOptions{}
 	op.GeoM.Translate(10, 10)

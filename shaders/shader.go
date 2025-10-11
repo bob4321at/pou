@@ -15,6 +15,29 @@ var Flash_Shader = `//kage:unit pixels
 			}
 `
 
+var Air_Bubble_Shader = `//kage:unit pixels
+	package main
+
+	var Percent float
+
+	func Fragment(targetCoords vec4, srcPos vec2, _ vec4) vec4 {
+		col := imageSrc0At(srcPos.xy)
+
+		Pos := imageSrc0Origin()
+		Size := imageSrc0Size()
+
+		var rot float = atan2((Size.x/2+(float(Pos.x)-float(srcPos.x))),(Size.y/2+(float(Pos.y)-float(srcPos.y))))
+		rot_deg := mod(rot*(180.0/3.14159), 360)  
+
+		if abs(rot_deg) > 360.0 * Percent {
+			col.a = 0
+			return vec4(0)
+		}
+
+		return col
+	}
+`
+
 var Test_Refraction_Shader = `//kage:unit pixels
 	package main
 
@@ -74,6 +97,10 @@ var Chunk_Shader = `//kage:unit pixels
 				}
 				if col.x >= 132.0/255 && col.x <= 134.0/255{
 					return vec4(RR, GG, BB, 255)
+				}
+
+				if col.x >= 126.0/255 && col.x <= 128.0/255 {
+					return vec4((R + RR) / 1.5, (G + GG) / 1.5, (B + BB) / 1.5, 1)
 				}
 
 				return col

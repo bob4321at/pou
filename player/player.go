@@ -1,6 +1,7 @@
 package player
 
 import (
+	"fmt"
 	"image/color"
 	"main/camera"
 	"main/enemies"
@@ -15,6 +16,9 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
+
+const MAX_PLAYER_OXYGEN int = 500
+const MAX_PLAYER_HEALTH int = 100
 
 type PlayerStruct struct {
 	Pos   utils.Vec2
@@ -37,6 +41,10 @@ type PlayerStruct struct {
 	Health_Bar_Img  *ebiten.Image
 	I_Frames        float64
 
+	UnderWater   bool
+	Oxygen       int
+	AirBubbleImg *textures.Texture
+
 	Charged int
 
 	Won bool
@@ -54,6 +62,24 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 	item.PlayerPos = &player.Pos
 	item.PlayerSpeed = &player.Speed
 	item.PlayerDamageMultiplier = &player.DamageMultiplier
+
+	if player.Pos.Y+360/2 > current_level.WaterLevel {
+		player.UnderWater = true
+	} else {
+		player.UnderWater = false
+	}
+
+	if player.UnderWater {
+		player.Oxygen -= 1
+	} else {
+		if player.Oxygen < MAX_PLAYER_OXYGEN {
+			player.Oxygen += 1
+		}
+	}
+
+	if player.Oxygen <= 0 {
+		player.Health = -1
+	}
 
 	if player.I_Frames > 0 {
 		player.I_Frames -= 0.1
@@ -261,7 +287,6 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 }
 
 func (player *PlayerStruct) Draw(screen *ebiten.Image) {
-
 	op := ebiten.DrawImageOptions{}
 
 	if player.Dir {
@@ -271,6 +296,14 @@ func (player *PlayerStruct) Draw(screen *ebiten.Image) {
 	}
 
 	op.GeoM.Translate(640/2-16, 360/2-24)
+
+	fmt.Println(float64(float64(player.Oxygen) / float64(MAX_PLAYER_OXYGEN)))
+	// if player.UnderWater {
+	player.AirBubbleImg.SetUniforms(map[string]any{
+		"Percent": float64(float64(player.Oxygen) / float64(MAX_PLAYER_OXYGEN)),
+	})
+	player.AirBubbleImg.Draw(screen, &op)
+	// }
 
 	if player.Speed == 1 {
 		player.Img.Draw(screen, &op)
@@ -299,6 +332,7 @@ func (player *PlayerStruct) Reset(spawn_pos utils.Vec2) {
 	player.Won = false
 	player.Charged = 0
 	player.Speed = 1
+	player.Oxygen = MAX_PLAYER_OXYGEN
 }
 
 func NewPlayer(pos utils.Vec2) (player PlayerStruct) {
@@ -309,13 +343,15 @@ func NewPlayer(pos utils.Vec2) (player PlayerStruct) {
 	player.Charge_UI = textures.NewTexture("./art/ui/charge.png", shaders.Fill_Shader)
 	player.Gun = gun.CreateFistGun()
 
-	player.Health = 100
-	player.Max_Health = player.Health
+	player.Health = MAX_PLAYER_HEALTH
 	player.Health_Bar_Img = ebiten.NewImage(250, 24)
 	player.Health_Bar_Img.Fill(color.RGBA{255, 50, 50, 255})
 
+	player.Oxygen = MAX_PLAYER_OXYGEN
+	player.AirBubbleImg = textures.NewTexture("./art/ui/air_bubble.png", shaders.Air_Bubble_Shader)
+
 	item.PlayerHealth = enemies.Player_Health
-	item.PlayerMaxHealth = player.Max_Health
+	item.PlayerMaxHealth = MAX_PLAYER_HEALTH
 
 	player.Won = false
 	player.Speed = 1

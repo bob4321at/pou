@@ -29,16 +29,19 @@ type Level struct {
 	End_Pos  utils.Vec2
 	Sock_Img *ebiten.Image
 
-	Tiles          []Tile
-	TileSet_Img    *ebiten.Image
-	TileSet        []*ebiten.Image
-	Enemy_Spawners []EnemySpawner
-	BreakableTile  []BreakableTile
-	TriggerTile    []TriggerTile
-	GunTiles       []GunTile
-	ItemTiles      []ItemTile
-	SpikeTiles     []SpikeTile
-	SpringTiles    []SpringTile
+	Tiles                    []Tile
+	TileSet_Img              *ebiten.Image
+	TileSet                  []*ebiten.Image
+	Enemy_Spawners           []EnemySpawner
+	BreakableTile            []BreakableTile
+	TriggerTile              []TriggerTile
+	GunTiles                 []GunTile
+	ItemTiles                []ItemTile
+	SpikeTiles               []SpikeTile
+	SpringTiles              []SpringTile
+	WaterTiles               []WaterTile
+	FloodTiles               []FloodTile
+	Signal_Controlling_Water *Signal
 
 	MovingPlatforms         []MovingPlatform
 	MovingPlatformPaths     map[int]map[int]utils.Vec2
@@ -55,6 +58,9 @@ type Level struct {
 	TileBorderColor color.RGBA
 	TileColor       color.RGBA
 	BackgroundColor color.RGBA
+
+	WaterLevel       float64
+	WaterLevelTarget float64
 }
 
 func (level *Level) Update() {
@@ -123,8 +129,31 @@ func (level *Level) Update() {
 		platform.Update(level)
 	}
 
+	for i := range level.WaterTiles {
+		water_tile := &level.WaterTiles[i]
+		water_tile.Update(level)
+	}
+
+	for i := range level.FloodTiles {
+		flood_tile := &level.FloodTiles[i]
+		flood_tile.Update(level)
+	}
+
 	enemies.AllEnemies = level.Enemies
 	gun.Enemies_In_Level = level.Enemies
+
+	if level.Signal_Controlling_Water != nil {
+		if level.WaterLevel > level.WaterLevelTarget {
+			level.WaterLevel -= 1
+		} else if level.WaterLevel < level.WaterLevelTarget {
+			level.WaterLevel += 1
+		}
+
+		if level.WaterLevel > level.WaterLevelTarget-5 && level.WaterLevel < level.WaterLevelTarget+5 {
+			level.Signal_Controlling_Water.Active = false
+			level.Signal_Controlling_Water = nil
+		}
+	}
 
 	for i := len(level.Items) - 1; i >= 0; i-- {
 		if level.Items[i].PickedUp() {

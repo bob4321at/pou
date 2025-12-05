@@ -74,9 +74,11 @@ type MovingPlatformTileJson struct {
 }
 
 type WaterTileJson struct {
-	Pos           utils.Vec2
-	Top_Bottom    bool
-	ReceiveSignal int
+	Pos                               utils.Vec2
+	Top_Bottom                        bool
+	Dissapear_Or_Appear               bool
+	Dissapear_Or_Appear_Top_Or_Bottom bool
+	ReceiveSignal                     int
 }
 
 type FloodTileJson struct {
@@ -301,9 +303,25 @@ func LoadLevel(level_name string) Level {
 
 	for _, water := range temp_level_json.WaterTiles {
 		if water.ReceiveSignal == 0 {
-			level.WaterTiles = append(level.WaterTiles, WaterTile{water.Pos, water.Top_Bottom, Signal{water.ReceiveSignal, true}, Water_Tile_Images[water.Top_Bottom]})
+			level.WaterTiles = append(level.WaterTiles, WaterTile{
+				water.Pos,
+				water.Top_Bottom,
+				Signal{water.ReceiveSignal, true},
+				water.Dissapear_Or_Appear,
+				water.Dissapear_Or_Appear_Top_Or_Bottom,
+				true,
+				*Water_Tile_Images[water.Top_Bottom],
+			})
 		} else {
-			level.WaterTiles = append(level.WaterTiles, WaterTile{water.Pos, water.Top_Bottom, Signal{water.ReceiveSignal, false}, Water_Tile_Images[water.Top_Bottom]})
+			level.WaterTiles = append(level.WaterTiles, WaterTile{
+				water.Pos,
+				water.Top_Bottom,
+				Signal{water.ReceiveSignal, false},
+				water.Dissapear_Or_Appear,
+				water.Dissapear_Or_Appear_Top_Or_Bottom,
+				water.Dissapear_Or_Appear,
+				*Water_Tile_Images[water.Top_Bottom],
+			})
 		}
 	}
 

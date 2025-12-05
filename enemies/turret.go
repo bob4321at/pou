@@ -4,6 +4,7 @@ import (
 	"main/camera"
 	"main/shaders"
 	"main/utils"
+	"math"
 
 	"github.com/bob4321at/textures"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -44,7 +45,8 @@ func (turret *Turret) Update() {
 	if turret.Timer > 0 {
 		turret.Timer -= 0.1
 	} else {
-		Enemies_To_Add = append(Enemies_To_Add, NewTurretBullet(utils.Vec2{X: turret.Pos.X + 12, Y: turret.Pos.Y + 12}))
+		angle := utils.GetAngle(utils.Vec2{X: Player_Pos.X + 320, Y: Player_Pos.Y + 180}, utils.Vec2{X: turret.Pos.X + 12, Y: turret.Pos.Y + 12})
+		SpawnProjectile(NewTurretBullet(utils.Vec2{X: turret.Pos.X + 12, Y: turret.Pos.Y + 12}, utils.Vec2{X: math.Cos(angle-utils.Deg2Rad(90)) * 10, Y: -math.Sin(angle-utils.Deg2Rad(90)) * 10}))
 		turret.Timer = turret.Max_Timer
 	}
 }

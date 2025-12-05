@@ -80,7 +80,6 @@ func (scene *GameScene) Reset() {
 }
 
 func (scene *GameScene) Draw(display *ebiten.Image) {
-	scene.Water_Shader_Layer.Img.Fill(color.RGBA{0, 0, 0, 0})
 	scene.Screen.Img.Fill(color.RGBA{0, 0, 0, 0})
 
 	scene.Player.Draw(scene.Screen.Img)
@@ -107,19 +106,34 @@ func (scene *GameScene) Draw(display *ebiten.Image) {
 		"BB": float64(scene.Current_Level.TileColor.B) / 255,
 	})
 
+	scene.Water_Shader_Layer.Img.Fill(color.RGBA{0, 0, 0, 0})
 	for _, water_tile := range scene.Current_Level.WaterTiles {
-		op := ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(water_tile.Pos.X)+(camera.Camera.Pos.X), float64(water_tile.Pos.Y)+(camera.Camera.Pos.Y))
-		water_tile.Image.SetUniforms(map[string]any{
-			"R": float64(scene.Current_Level.TileBorderColor.R) / 255,
-			"G": float64(scene.Current_Level.TileBorderColor.G) / 255,
-			"B": float64(scene.Current_Level.TileBorderColor.B) / 255,
+		if water_tile.There_or_Not == true {
+			op := ebiten.DrawImageOptions{}
+			op.GeoM.Translate(float64(water_tile.Pos.X)+(camera.Camera.Pos.X), float64(water_tile.Pos.Y)+(camera.Camera.Pos.Y))
+			if !water_tile.Dissapear_or_Appear {
+				water_tile.Image.SetUniforms(map[string]any{
+					"R": float64(scene.Current_Level.TileBorderColor.R) / 255,
+					"G": float64(scene.Current_Level.TileBorderColor.G) / 255,
+					"B": float64(scene.Current_Level.TileBorderColor.B) / 255,
 
-			"RR": float64(scene.Current_Level.TileColor.R) / 255,
-			"GG": float64(scene.Current_Level.TileColor.G) / 255,
-			"BB": float64(scene.Current_Level.TileColor.B) / 255,
-		})
-		water_tile.Image.Draw(scene.Water_Shader_Layer.Img, &op)
+					"RR": float64(scene.Current_Level.TileColor.R) / 255,
+					"GG": float64(scene.Current_Level.TileColor.G) / 255,
+					"BB": float64(scene.Current_Level.TileColor.B) / 255,
+				})
+			} else {
+				water_tile.Image.SetUniforms(map[string]any{
+					"R": float64(scene.Current_Level.TileBorderColor.R) / 255,
+					"G": float64(scene.Current_Level.TileBorderColor.G) / 255 / 2,
+					"B": float64(scene.Current_Level.TileBorderColor.B) / 255,
+
+					"RR": float64(scene.Current_Level.TileColor.R) / 255,
+					"GG": float64(scene.Current_Level.TileColor.G) / 255 / 2,
+					"BB": float64(scene.Current_Level.TileColor.B) / 255,
+				})
+			}
+			water_tile.Image.Draw(scene.Water_Shader_Layer.Img, &op)
+		}
 	}
 
 	display.Fill(scene.Current_Level.BackgroundColor)

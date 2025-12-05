@@ -40,7 +40,7 @@ func NewWorldMapScene() Scene {
 	scene.World_Maps = []worldmap.WorldMapStruct{
 		worldmap.NewWorldMap(
 			"./art/menus/world_maps/world_one_map.png",
-			worldmap.NewLevelPoint("test", utils.Vec2{X: 0, Y: 0}),
+			worldmap.NewLevelPoint("flood_intro", utils.Vec2{X: 0, Y: 0}),
 			worldmap.NewLevelPoint("tutorial", utils.Vec2{X: 71, Y: 39}),
 			worldmap.NewLevelPoint("test_real_level", utils.Vec2{X: 294, Y: 44}),
 			worldmap.NewLevelPoint("spikes_come", utils.Vec2{X: 597, Y: 54}),

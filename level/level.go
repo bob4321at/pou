@@ -64,6 +64,12 @@ type Level struct {
 }
 
 func (level *Level) Update() {
+	if ebiten.IsKeyPressed(ebiten.KeyY) {
+		level.WaterLevel -= 0.1
+		if ebiten.IsKeyPressed(ebiten.KeyShift) {
+			level.WaterLevel += 0.2
+		}
+	}
 	enemies.Breakable_Tile_Hitboxes = nil
 	item.Breakable_Tile_Hitboxes = nil
 
@@ -103,6 +109,13 @@ func (level *Level) Update() {
 			}
 		}
 	}
+
+	for i := range enemies.Projectiles {
+		projectile := enemies.Projectiles[i]
+		projectile.Update()
+	}
+
+	enemies.ManageProjectiles()
 
 	for i := range level.Dropped_Guns {
 		dropped_gun := &level.Dropped_Guns[i]
@@ -233,6 +246,11 @@ func (level *Level) Draw(screen *ebiten.Image) {
 		}
 	}
 
+	for i := range enemies.Projectiles {
+		projectile := enemies.Projectiles[i]
+		projectile.Draw(screen)
+	}
+
 	for _, dropped_gun := range level.Dropped_Guns {
 		dropped_gun.Draw(screen)
 	}
@@ -244,17 +262,6 @@ func (level *Level) Draw(screen *ebiten.Image) {
 
 func (level *Level) Reset() {
 	level.Enemies = nil
-
-	for i := range level.Enemy_Spawners {
-		level.Enemy_Spawners[i].Index = 0
-		level.Enemy_Spawners[i].Responsible_For = nil
-		level.Enemy_Spawners[i].Timer = 10
-		level.Enemy_Spawners[i].SendSignal.Active = false
-	}
-
-	for i := range level.BreakableTile {
-		level.BreakableTile[i].ReceiveSignal.Active = false
-	}
 }
 
 func (level *Level) CheckCollision(pos utils.Vec2, size utils.Vec2) (bool, utils.Vec2) {

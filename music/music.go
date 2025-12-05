@@ -32,7 +32,7 @@ func (music *MusicStruct) PlaySong(path string) {
 	}
 
 	music.Player = music.Context.NewPlayer(decodedMP)
-	music.Player.Play()
+	// music.Player.Play()
 }
 
 func (music *MusicStruct) Reset() {

@@ -173,6 +173,10 @@ func (gun *MechaGun) CanShoot() bool {
 	return gun.Cooldown <= 0
 }
 
+func (gun *MechaGun) ClearBullets() {
+	gun.Bullets = nil
+}
+
 func CreateMechaGun() Gun {
 	gun := MechaGun{}
 

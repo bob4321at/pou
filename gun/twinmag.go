@@ -214,6 +214,10 @@ func (gun *TwinMagGun) CanShoot() bool {
 	return gun.Cooldown <= 0
 }
 
+func (gun *TwinMagGun) ClearBullets() {
+	gun.Bullets = nil
+}
+
 func CreateTwinMagGun() Gun {
 	gun := TwinMagGun{}
 

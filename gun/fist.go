@@ -201,6 +201,10 @@ func (gun *FistGun) CanShoot() bool {
 	return gun.Cooldown <= 0
 }
 
+func (gun *FistGun) ClearBullets() {
+	gun.Bullets = nil
+}
+
 func CreateFistGun() Gun {
 	gun := FistGun{}
 

@@ -169,6 +169,10 @@ func (gun *NerfGun) CanShoot() bool {
 	return gun.Cooldown <= 0
 }
 
+func (gun *NerfGun) ClearBullets() {
+	gun.Bullets = nil
+}
+
 func CreateNerfGun() Gun {
 	gun := NerfGun{}
 

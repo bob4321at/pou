@@ -31,6 +31,7 @@ type Gun interface {
 	GetDroppedImg() textures.RenderableTexture
 	GetCharge() int
 	CanShoot() bool
+	ClearBullets()
 }
 
 var Guns = map[int]func() Gun{

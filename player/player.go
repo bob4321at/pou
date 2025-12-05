@@ -1,7 +1,6 @@
 package player
 
 import (
-	"fmt"
 	"image/color"
 	"main/camera"
 	"main/enemies"
@@ -63,7 +62,17 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 	item.PlayerSpeed = &player.Speed
 	item.PlayerDamageMultiplier = &player.DamageMultiplier
 
-	if player.Pos.Y+360/2 > current_level.WaterLevel {
+	in_water_tile := false
+
+	for _, water_tile := range current_level.WaterTiles {
+		if water_tile.There_or_Not {
+			if utils.Collide(utils.Vec2{X: player.Pos.X + 640/2 - 14, Y: player.Pos.Y + player.Vel.Y + 360/2 - 18}, utils.Vec2{X: 32, Y: 8}, water_tile.Pos, utils.Vec2{X: 32, Y: 32}) {
+				in_water_tile = true
+			}
+		}
+	}
+
+	if player.Pos.Y+360/2 > current_level.WaterLevel+8 || in_water_tile == true {
 		player.UnderWater = true
 	} else {
 		player.UnderWater = false
@@ -85,10 +94,16 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 		player.I_Frames -= 0.1
 	} else {
 		player.I_Frames = 0
-		for ei := range current_level.Enemies {
-			enemy := current_level.Enemies[ei]
+		for enemy_index := range current_level.Enemies {
+			enemy := current_level.Enemies[enemy_index]
 			if utils.Collide(utils.Vec2{X: player.Pos.X + player.Vel.X*player.Speed + 640/2 - 14, Y: player.Pos.Y + 360/2 - 18}, utils.Vec2{X: 32, Y: 48}, enemy.GetPosition(), enemy.GetSize()) {
 				enemy.HitPlayer()
+			}
+		}
+
+		for _, projectile := range enemies.Projectiles {
+			if utils.Collide(utils.Vec2{X: player.Pos.X + player.Vel.X*player.Speed + 640/2 - 14, Y: player.Pos.Y + 360/2 - 18}, utils.Vec2{X: 32, Y: 48}, projectile.GetPos(), projectile.GetSize()) {
+				projectile.Hit()
 			}
 		}
 
@@ -137,16 +152,6 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 	if player.Health < player.Previous_Health {
 		player.I_Frames = 1
 	}
-
-	player.Img.Update()
-	player.Img.SetUniforms(map[string]any{
-		"I": player.I_Frames,
-	})
-
-	player.WithFlyingBootsImage.Update()
-	player.WithFlyingBootsImage.SetUniforms(map[string]any{
-		"I": player.I_Frames,
-	})
 
 	player.Img.Current_Animation = 0
 	player.WithFlyingBootsImage.Current_Animation = 0
@@ -287,6 +292,16 @@ func (player *PlayerStruct) Update(current_level *level.Level) {
 }
 
 func (player *PlayerStruct) Draw(screen *ebiten.Image) {
+	player.Img.Update()
+	player.Img.SetUniforms(map[string]any{
+		"I": player.I_Frames,
+	})
+
+	player.WithFlyingBootsImage.Update()
+	player.WithFlyingBootsImage.SetUniforms(map[string]any{
+		"I": player.I_Frames,
+	})
+
 	op := ebiten.DrawImageOptions{}
 
 	if player.Dir {
@@ -297,13 +312,12 @@ func (player *PlayerStruct) Draw(screen *ebiten.Image) {
 
 	op.GeoM.Translate(640/2-16, 360/2-24)
 
-	fmt.Println(float64(float64(player.Oxygen) / float64(MAX_PLAYER_OXYGEN)))
-	// if player.UnderWater {
-	player.AirBubbleImg.SetUniforms(map[string]any{
-		"Percent": float64(float64(player.Oxygen) / float64(MAX_PLAYER_OXYGEN)),
-	})
-	player.AirBubbleImg.Draw(screen, &op)
-	// }
+	if player.UnderWater || float64(float64(player.Oxygen)/float64(MAX_PLAYER_OXYGEN)) != 1 {
+		player.AirBubbleImg.SetUniforms(map[string]any{
+			"Percent": float64(float64(player.Oxygen) / float64(MAX_PLAYER_OXYGEN)),
+		})
+		player.AirBubbleImg.Draw(screen, &op)
+	}
 
 	if player.Speed == 1 {
 		player.Img.Draw(screen, &op)
@@ -326,6 +340,7 @@ func (player *PlayerStruct) Draw(screen *ebiten.Image) {
 }
 
 func (player *PlayerStruct) Reset(spawn_pos utils.Vec2) {
+	player.Gun.ClearBullets()
 	player.Pos = spawn_pos
 	player.I_Frames = 0
 	player.Health = 100

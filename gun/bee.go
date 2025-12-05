@@ -202,6 +202,10 @@ func (gun *BeeGun) CanShoot() bool {
 	return gun.Cooldown <= 0
 }
 
+func (gun *BeeGun) ClearBullets() {
+	gun.Bullets = nil
+}
+
 func CreateBeeGun() Gun {
 	gun := BeeGun{}
 

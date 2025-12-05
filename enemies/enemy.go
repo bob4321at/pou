@@ -16,6 +16,15 @@ type Enemy interface {
 	GetHealth() int
 }
 
+type EnemyProjectile interface {
+	Draw(screen *ebiten.Image)
+	Update()
+	Hit()
+	GetSize() utils.Vec2
+	GetPos() utils.Vec2
+	ShouldRemove() bool
+}
+
 var EnemySpawnFuncs = map[int]func(pos utils.Vec2) Enemy{
 	1: NewTarget,
 	2: NewBlueGhost,
@@ -36,6 +45,20 @@ var Player_Pos *utils.Vec2
 var Player_Health *int
 
 var Enemies_To_Add []Enemy
+var Projectiles []EnemyProjectile
+
+func ManageProjectiles() {
+	for projectile_index := len(Projectiles); projectile_index > 0; projectile_index++ {
+		projectile := Projectiles[projectile_index-1]
+		if projectile.ShouldRemove() {
+			utils.RemoveArrayElement(projectile_index, &Projectiles)
+		}
+	}
+}
+
+func SpawnProjectile(projectile EnemyProjectile) {
+	Projectiles = append(Projectiles, projectile)
+}
 
 func CheckLevelCollision(pos utils.Vec2, size utils.Vec2) (bool, utils.Vec2) {
 	hit := false
